@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.8">
+<meta name="description" content="この文書は、技術教育「要素技術とモデルを開発に使おう」に使用するETロボコン公式トレーニングのテキストです。">
+<meta name="author" content="ETロボコン実行委員会">
+<title>要素技術とモデルを開発に使おう: コードとモデル図を対応づけてみよう</title>
+<link rel="stylesheet" href="css/mystyle.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>要素技術とモデルを開発に使おう: コードとモデル図を対応づけてみよう</h1>
+<div class="details">
+<span id="author" class="author">ETロボコン実行委員会</span><br>
+<span id="email" class="email"><a href="mailto:er-info@etrobo.jp">er-info@etrobo.jp</a></span><br>
+<span id="revnumber"> 2.3,</span>
+<span id="revdate">2019-04-12 16:46:58</span>
+<br><span id="revremark">2019年用</span>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_sample00ウォーカーを動かしてみよう"><a class="anchor" href="#_sample00ウォーカーを動かしてみよう"></a>sample00（ウォーカー）を動かしてみよう</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>sample00</code> をビルドして動かしてみましょう。</p>
+</div>
+<div class="paragraph">
+<p>どんな動きをするプログラムでしょうか。</p>
+</div>
+<div class="listingblock">
+<div class="title">リスト 1. <code>sample00/app.cpp</code></div>
+<div class="content">
+<pre class="prettyprint highlight linenums"><code class="language-cpp" data-lang="cpp">#include "app.h"
+#include "util.h"
+
+#include "Motor.h"
+#include "Clock.h"
+
+using namespace ev3api;
+
+/**
+ * メインタスク
+ */
+// tag::main_task_1[]
+void main_task(intptr_t unused) {
+
+  Motor leftWheel(PORT_C);
+  Motor rightWheel(PORT_B);
+  Clock clock;
+
+  const int8_t pwm = (Motor::PWM_MAX) / 6;
+  const uint32_t duration = 2000;
+
+  init_f(__FILE__);
+  while(1) {
+    msg_f("Forwarding...", 1);
+    leftWheel.setPWM(pwm);
+    rightWheel.setPWM(pwm);
+    clock.sleep(duration);
+// end::main_task_1[]
+// tag::main_task_2[]
+    msg_f("Backwarding...", 1);
+    leftWheel.setPWM(-pwm);
+    rightWheel.setPWM(-pwm);
+    clock.sleep(duration);
+
+    // 左ボタンを長押し、それを捕捉する
+    if (ev3_button_is_pressed(LEFT_BUTTON)) {
+      break;
+    }
+  }
+
+  msg_f("Stopped.", 1);
+  leftWheel.stop();
+  rightWheel.stop();
+  while(ev3_button_is_pressed(LEFT_BUTTON)) {
+    ;
+  }
+
+  ext_tsk();
+}
+// end::main_task_2[]</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_どんな動作をするプログラム"><a class="anchor" href="#_どんな動作をするプログラム"></a>どんな動作をするプログラム？</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>ビルドの方法はわかりますか。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-console" data-lang="console">$ cd （EV3RTのインストールディレクトリ）/hrp2/sdk/beginners
+$ make app=sample00</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>ビルドできたら、床の上などで動かしてみましょう。</p>
+</div>
+<div class="paragraph">
+<p>ロボットは、次のような動きをします。</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>2000msごとに、前進と後退を繰り返す</p>
+</li>
+<li>
+<p>左ボタンをしばらく押し続けていると、そのうち押されたことが捕捉され、停止する</p>
+</li>
+</ul>
+</div>
+<div class="sect2">
+<h3 id="_それはプログラムのどこに書いてありますか"><a class="anchor" href="#_それはプログラムのどこに書いてありますか"></a>それはプログラムのどこに書いてありますか</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>前進する、後退するという処理はどれですか</p>
+</li>
+<li>
+<p>ボタンが押されるという処理はどれですか</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_その前に"><a class="anchor" href="#_その前に"></a>その前に…</h3>
+<div class="paragraph">
+<p>そもそも、何をしているのかプログラムから読み取れますか？</p>
+</div>
+<div class="paragraph">
+<p>図に表して確認してみましょう。</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_サンプルモデル図のプロジェクトを作る"><a class="anchor" href="#_サンプルモデル図のプロジェクトを作る"></a>サンプルモデル図のプロジェクトを作る</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><strong>astah* </strong> でモデル図を作成するプロジェクトを用意します。</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>デスクトップに演習用のディレクトリ（フォルダー） <code>beginners</code> を作ります</p>
+</li>
+<li>
+<p><strong> astah* Professional </strong> を起動します（ライセンスは設定できていますか）</p>
+</li>
+<li>
+<p>「ファイル」→「プロジェクトの新規作成」でプロジェクトを作成します</p>
+</li>
+<li>
+<p>プロジェクトのファイル名は <code>sample00</code> にしましょう（ファイル名は <code>sample00.asta</code> になります）</p>
+</li>
+<li>
+<p>「ファイル」→「プロジェクトを保存」で、 <code>beginners</code> ディレクトリに保存します</p>
+</li>
+</ol>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="images/プロジェクトを保存する.png" alt="プロジェクトを保存する" width="50%">
+</div>
+<div class="title">図 1. プロジェクトを保存する</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ライブラリの参照プロジェクトを追加する"><a class="anchor" href="#_ライブラリの参照プロジェクトを追加する"></a>ライブラリの参照プロジェクトを追加する</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>EV3RTの C&#43;&#43; 用のクラス群が定義されているプロジェクトを用意してあるので、これを自分が作成したプロジェクトから参照できるようにします。</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>「ファイル」→「参照プロジェクト管理」で参照プロジェクト管理ダイアログを開きます</p>
+</li>
+<li>
+<p>「追加」ボタンで「ファイルの指定」ダイアログを開きます</p>
+</li>
+<li>
+<p>「相対パス」をチエックして、ファイル名に <code>ev3rt.asta</code> を指定し「了解」ボタンを押します</p>
+</li>
+<li>
+<p>参照プロジェクト管理ダイアログを閉じます</p>
+</li>
+<li>
+<p>構造ツリーに <code>ev3api</code> というパッケージが追加されていることを確認しましょう</p>
+</li>
+</ol>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="images/参照プロジェクトファイルを指定する.png" alt="参照プロジェクトファイルを指定する" width="75%">
+</div>
+<div class="title">図 2. 参照プロジェクトとして <code>ev3rt.asta</code> を相対指定する</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_コードの登場人物をオブジェクト図に表す"><a class="anchor" href="#_コードの登場人物をオブジェクト図に表す"></a>コードの登場人物をオブジェクト図に表す</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>sample00</code> のコードを、「モノ」と「働き」に着目して整理します。次の手順に従って図に表してみましょう。</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>「図」→「クラス図」でクラス図を追加し、図の名前を <code>sample00のオブジェクト図</code> にします</p>
+</li>
+<li>
+<p>コードの中から「モノ」を探してオブジェクトにします</p>
+<div class="ulist">
+<ul>
+<li>
+<p>たとえば、 <code>leftWheel</code> （左車輪）は <code>sample00.cpp</code> で使っているインスタンスですから「モノ」とみなせそうです</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>「モノ」と識別した対象をオブジェクトとして図に描きます</p>
+<div class="ulist">
+<ul>
+<li>
+<p>クラス図のパレットから「インスタンス仕様」を選択し、アイコンが反転したら、マウスをダイアグラムエディター上でクリックします</p>
+</li>
+<li>
+<p>「インスタンス仕様0」のように仮の名前が表示されるので、これを <code>leftWheel</code> に変更します</p>
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="images/インスタンス仕様とリンクのアイコン.png" alt="{three-quoaters-width}">
+</div>
+<div class="title">図 3. インスタンス仕様とリンクのアイコン</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic" start="4">
+<li>
+<p>同様にして、コード上にある <code>rightWheel</code> 、 <code>clock</code> も「モノ」とみなしてオブジェクトにします</p>
+</li>
+<li>
+<p><code>main_task</code> もオブジェクトとして作成します</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>main_task</code> は、RTOSから呼び出されるCの関数ので、通常なら「働き」にあたりますが、この演習では呼び出す側のクラスのインスタンスとみなして扱うことにします</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>「働き」を呼び出している側と呼びだされている側の間に、リンクを引きます</p>
+<div class="ulist">
+<ul>
+<li>
+<p>あるオブジェクトが別のオブジェクトの「働き」を呼び出して使っているなら、その間にリンクの線を引きます（関数とその関数を呼び出す側の関係と考えてみてください）</p>
+</li>
+<li>
+<p>クラス図のパレットから「リンク」を選択し、アイコンが反転したら、一方のオブジェクトの上でマウスのボタンを押し、他方のオブジェクトの上まで移動したらボタンを離します</p>
+</li>
+<li>
+<p>たとえば、<code>leftWheel</code> の <code>setPWM</code> は、モーターにPWM値を設定しているので、 <code>leftWheel</code> の働きといえそうですが、これを呼び出して使っている「モノ」とは何でしょうか</p>
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_作成したsample00のオブジェクト図１"><a class="anchor" href="#_作成したsample00のオブジェクト図１"></a>作成したsample00のオブジェクト図１</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>この図では各インスタンスの「スロットの表示」を「オフ」にしています。</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="images/sample00のオブジェクト図.png" alt="sample00のオブジェクト図.png" width="100%">
+</div>
+<div class="title">図 4. <code>sample00</code> のオブジェクト図</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_インスタンスをクラスと関係づける"><a class="anchor" href="#_インスタンスをクラスと関係づける"></a>インスタンスをクラスと関係づける</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>それぞれのインスタンスと関連するクラスがわかるようクラスを指定してみましょう。</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><code>leftWheel</code> を選択します（4隅にハンドルが現れます）</p>
+</li>
+<li>
+<p>画面左下のプロパティエディターから「ベース」を選択し、「名前」が先ほど選択した <code>leftWheel</code> なのを確認します</p>
+</li>
+<li>
+<p>ベースクラスのリストから <code>Motor - ev3api</code> を選びます</p>
+</li>
+<li>
+<p><code>leftWheel</code> の図が <code>Motor</code> クラスのインスタンスとして表示されます</p>
+</li>
+<li>
+<p>同様にして <code>rightWheel</code> 、 <code>clock</code> もクラスを関連づけます</p>
+</li>
+</ol>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="images/leftWheelにMotorクラスを割り当てる.png" alt="leftWheelにMotorクラスを割り当てる" width="75%">
+</div>
+<div class="title">図 5. <code>leftWheel</code> に <code>Motor</code> クラスを割り当てる</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_作成したsample00のオブジェクト図２"><a class="anchor" href="#_作成したsample00のオブジェクト図２"></a>作成したsample00のオブジェクト図２</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>クラスと関連づけたので、「オブジェクト名：クラス名」という表示に変わっています。</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="images/sample00のオブジェクト図クラス名あり.png" alt="sample00のオブジェクト図クラス名あり" width="100%">
+</div>
+<div class="title">図 6. <code>sample00</code> のオブジェクト図（クラスと関連づけ後）</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_クラス図に表してみる"><a class="anchor" href="#_クラス図に表してみる"></a>クラス図に表してみる</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>クラス図を作成して、インスタンス同士の関係をクラス同士の関係で表してみましょう。</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>「図」→「クラス図」でクラス図を追加し、図の名前を <code>sample00のクラス図</code> にします</p>
+</li>
+<li>
+<p>クラス図のパレットから「クラス」を選択し、アイコンが反転したら、マウスをダイアグラムエディター上でクリックします</p>
+</li>
+<li>
+<p>「クラス0」を、 <code>sample00.cpp</code> で便宜上クラスとして扱うことにした <code>main_task</code> に変更します</p>
+</li>
+<li>
+<p>「構造ツリー」の <code>ev3api</code> パッケージを展開して <code>Motor</code> クラスをダイアグラムエディターにドラッグ＆ドロップします</p>
+</li>
+<li>
+<p>同様にして <code>Clock</code> クラスを配置します</p>
+</li>
+<li>
+<p>使っている側のクラスから、使われている側のクラスへ、参照に使っているインスタンスごとに単方向関連を引きます</p>
+</li>
+<li>
+<p>関連の端にマウスを移動すると「→」がポップアップするので、 <code>leftWheel</code> などの関連端名をつけます</p>
+</li>
+<li>
+<p>「その他の表示/非表示」→「名前空間の表示」→「親の表示」を設定するとクラス名の前にパッケージの名前が表示されます</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_作成した_sample00_のクラス図"><a class="anchor" href="#_作成した_sample00_のクラス図"></a>作成した sample00 のクラス図</h2>
+<div class="sectionbody">
+<div class="imageblock text-center">
+<div class="content">
+<img src="images/sample00のクラス図.png" alt="sample00のクラス図" width="75%">
+</div>
+<div class="title">図 7. <code>sample00</code> のクラス図</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_作成した図から何が言えるでしょうか"><a class="anchor" href="#_作成した図から何が言えるでしょうか"></a>作成した図から何が言えるでしょうか</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>どんなクラスを使っているかわかりますか</p>
+</li>
+<li>
+<p>どんなクラスのインスタンス（オブジェクト）を使っているかわかりますか</p>
+</li>
+<li>
+<p>どんなことがやりたいシステムかわかりますか</p>
+</li>
+<li>
+<p>どんな処理をするシステムかわかりますか</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>などなど考えてみたところ…</p>
+</div>
+<div class="openblock">
+<div class="title">sample00 は:</div>
+<div class="content">
+<div class="paragraph">
+<p><code>Motor</code> クラスと <code>Clock</code> クラスを使っているアプリケーションであるというほかは、どのようなことをやりたいのか書いていないコードになっている</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>ということがわかりました。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_システムの処理を担当するクラスを追加する"><a class="anchor" href="#_システムの処理を担当するクラスを追加する"></a>システムの処理を担当するクラスを追加する</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>決まった走行（前進・後退を繰り返す）をロボットにさせたいのに、 <code>sample00</code> にはそのことがわかるクラスがありません。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>このロボットがやる仕事を担当するクラスを作って、仕事の担当者としての名前をつけてみましょう。</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_クラス図にwalkerクラスを追加する"><a class="anchor" href="#_クラス図にwalkerクラスを追加する"></a>クラス図にWalkerクラスを追加する</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>sample00</code> のクラス図を元に、 <code>Walker</code> クラスを追加し、 <code>run</code> メソッドを追加した <code>sample01</code> のクラス図を作成しましょう。</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>「ファイル」→「プロジェクトの別名保存」で <code>sample01</code> として保存します（ファイル名は <code>sample01.asta</code> になります）</p>
+</li>
+<li>
+<p>クラス図の名前を <code>sample01のクラス図</code> に変更します</p>
+</li>
+<li>
+<p>クラス図のパレットからクラスをドラッグ＆ドロップして、新しいクラス <code>Walker</code> を追加します</p>
+</li>
+<li>
+<p><code>Walker</code> クラスにコンストラクタと <code>run</code> メソッドを追加します</p>
+<div class="ulist">
+<ul>
+<li>
+<p>デストラクタは作成せず、コンパイラに任せることにします</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><code>pwm</code> 、 <code>duration</code> は <code>Walker</code> クラスの属性にします</p>
+</li>
+<li>
+<p><code>main_task</code> は自分の仕事を <code>Walker</code> に移譲するので、関連を引き直します</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>Motor</code> クラス、 <code>Clock</code> クラスは <code>Walker</code> クラスと一緒に使うので、コンポジションにしておきます</p>
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_作成したsample01のクラス図"><a class="anchor" href="#_作成したsample01のクラス図"></a>作成したsample01のクラス図</h2>
+<div class="sectionbody">
+<div class="imageblock text-center">
+<div class="content">
+<img src="images/sample01のクラス図.png" alt="sample01のクラス図" width="75%">
+</div>
+<div class="title">図 8. <code>sample01</code> のクラス図</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_sample01のコードを作成する"><a class="anchor" href="#_sample01のコードを作成する"></a>sample01のコードを作成する</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>モデル図に合わせて、コードを変更しましょう。</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>サンプルコードの <code>sample00</code> ディレクトリをそっくりコピーして <code>sample01</code> ディレクトリを作りましょう</p>
+</li>
+<li>
+<p>ファイルは分割しないで、 <code>app.cpp</code> の中に <code>Walker</code> クラスを作成しましょう</p>
+</li>
+<li>
+<p>クラス図に従って <code>Walker</code> クラスを作成します</p>
+</li>
+<li>
+<p><code>Walker</code> クラスの <code>run</code> メソッドに <code>main_task</code> の処理を移動します</p>
+</li>
+<li>
+<p><code>main_task</code> は <code>Walker</code> クラスのインスタンスの作成と <code>run</code> メソッドの呼び出しを担当します</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>作成したコードは次ページ以降に掲載してあります。</p>
+</div>
+<div class="paragraph">
+<p>コードが作成できたら、ビルドして、動作を確認しましょう。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-console" data-lang="console">$ cd （EV3RTのインストールディレクトリ）/hrp2/sdk/beginners
+$ make app=sample01</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">リスト 2. <code>sample01/app.cpp</code> （その１）</div>
+<div class="content">
+<pre class="prettyprint highlight linenums"><code class="language-cpp" data-lang="cpp">#include "app.h"
+#include "util.h"
+
+#include "Motor.h"
+#include "Clock.h"
+
+using namespace ev3api;
+
+class Walker {
+public:
+  Walker();
+  void run();
+
+private:
+  Motor leftWheel;              <i class="conum" data-value="1"></i><b>(1)</b>
+  Motor rightWheel;             <i class="conum" data-value="1"></i><b>(1)</b>
+  Clock clock;                  <i class="conum" data-value="1"></i><b>(1)</b>
+
+  const int8_t pwm = (Motor::PWM_MAX) / 6;
+  const uint32_t duration = 2000;
+};</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>Motor</code> クラスと <code>Clock</code> クラスのインスタンスは、 <code>Walker</code> のインスタンスと共に作成・破棄する</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="title">リスト 3. <code>sample01/app.cpp</code> （その２）</div>
+<div class="content">
+<pre class="prettyprint highlight linenums"><code class="language-cpp" data-lang="cpp">Walker::Walker():
+  leftWheel(PORT_C), rightWheel(PORT_B) {
+}
+
+void Walker::run() {
+  init_f(__FILE__);
+  while(1) {
+    msg_f("Forwarding...", 1);
+    leftWheel.setPWM(pwm);
+    rightWheel.setPWM(pwm);
+    clock.sleep(duration);
+
+    msg_f("Backwarding...", 1);
+    leftWheel.setPWM(-pwm);
+    rightWheel.setPWM(-pwm);
+    clock.sleep(duration);
+
+    // 左ボタンを長押し、それを捕捉する
+    if (ev3_button_is_pressed(LEFT_BUTTON)) {
+      break;
+    }
+  }
+
+  msg_f("Stopped.", 1);
+  leftWheel.stop();
+  rightWheel.stop();
+  while(ev3_button_is_pressed(LEFT_BUTTON)) {
+    ;
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">リスト 4. <code>sample01/app.cpp</code> （その３）</div>
+<div class="content">
+<pre class="prettyprint highlight linenums"><code class="language-cpp" data-lang="cpp">void main_task(intptr_t unused) {
+
+  Walker walker;                <i class="conum" data-value="1"></i><b>(1)</b>
+
+  walker.run();                 <i class="conum" data-value="2"></i><b>(2)</b>
+
+  ext_tsk();
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>Walker</code> クラスのインスタンスを作成</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td><code>run</code> メソッドを実行</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ここまでのまとめ"><a class="anchor" href="#_ここまでのまとめ"></a>ここまでのまとめ</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>sample01</code> のコードとモデル図を作成しました。</p>
+</div>
+<div class="paragraph">
+<p>この演習から何が言えるでしょうか。</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>ロボットがやりたいことを担当するクラスを追加しました</p>
+<div class="ulist">
+<ul>
+<li>
+<p>図やコードを読んだ時に、何がしたいのかわかるようになりました</p>
+</li>
+<li>
+<p>やりたいことに「名前」がつきました</p>
+</li>
+<li>
+<p><code>Walker</code> クラスの <code>run</code> メソッドに処理を走行の詳細を閉じ込めることができました</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><code>main_task</code> は <code>Walker</code> クラスを使うだけになりました</p>
+</li>
+<li>
+<p>クラス図を変更し、それに合わせてコードを作成しました</p>
+<div class="ulist">
+<ul>
+<li>
+<p>クラス図とコードが対応していて、どちらで検討しても他方でも辻褄が合うようになりました</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="openblock">
+<div class="title"><code>Walker</code> クラスを別ファイルに分割してみよう:</div>
+<div class="content">
+<div class="paragraph">
+<p><code>sample01</code> では、演習を簡便に済ませるために、 <code>app.c</code> ファイルの中に <code>Walker</code> クラスを作りました。
+さらに進めて、 <code>Walker</code> クラスを別ファイルに分割した場合のサンプル <code>sample01_01</code> を用意してあります。参考にしてみてください。</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_walkerクラスの課題を考えよう"><a class="anchor" href="#_walkerクラスの課題を考えよう"></a>Walkerクラスの課題を考えよう</h2>
+<div class="sectionbody">
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>この節は、技術教育の中では紹介だけにします。演習時間に余裕があるときに実施してください。<br>
+ <a href="#end_of_chapter">この章（ <code>text01</code> ）の終わりへ</a></p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p><code>sample01</code> では、決まった走行（前進・後退を繰り返す）をロボットにさせるために、その動作を担当する <code>Walker</code> クラスを作成し、決まった走行をするという動作を担当する <code>run</code> メソッドを用意しました。</p>
+</div>
+<div class="paragraph">
+<p>それでは、 <code>sample01</code> のクラス図とコードをもう一度よく見てみましょう。決まった走行としてやりたかったこと（前進・後退を繰り返す）がわかるでしょうか。</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="images/sample01のWalkerのクラス図.png" alt="sample01のWalkerのクラス図" width="50%">
+</div>
+<div class="title">図 9. <code>sample01</code> のクラス図（ <code>Walker</code> クラス部分の抜粋）</div>
+</div>
+<div class="paragraph">
+<p>このクラス図を見ても、「前進する」「後退する」といった動作があるとは分からないですね。</p>
+</div>
+<div class="listingblock">
+<div class="title">リスト 5. <code>sample01/app.cpp</code> （ <code>run</code> メソッドの冒頭部分の抜粋）</div>
+<div class="content">
+<pre class="prettyprint highlight linenums"><code class="language-cpp" data-lang="cpp">void Walker::run() {
+  init_f(__FILE__);
+  while(1) {
+    msg_f("Forwarding...", 1);
+    leftWheel.setPWM(pwm);
+    rightWheel.setPWM(pwm);
+    clock.sleep(duration);
+
+    msg_f("Backwarding...", 1);
+    leftWheel.setPWM(-pwm);
+    rightWheel.setPWM(-pwm);
+    clock.sleep(duration);
+
+    // 左ボタンを長押し、それを捕捉する</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>このコードを見ても、メッセージはあるものの、「前進する」「後退する」といった動作がどの部分なのかわからないですね。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_walkerクラスに操作を追加する"><a class="anchor" href="#_walkerクラスに操作を追加する"></a>Walkerクラスに操作を追加する</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>sample01</code> の <code>Walker</code> クラスでは、「前進する」「後退する」といった動作がわかりませんでした。
+動作がわかるようにするには、該当する処理を「前進する」など <strong>動作の名前</strong> で呼ぶことができればよい、つまり <strong>メソッド</strong> にすればよいですね。</p>
+</div>
+<div class="paragraph">
+<p><code>sample01</code> のクラス図を元に、 <code>Walker</code> クラスに <code>forward</code> メソッドなどを追加した <code>sample02</code> のクラス図を作成しましょう。</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>「ファイル」→「プロジェクトの別名保存」で <code>sample02</code> として保存します（ファイル名は <code>sample02.asta</code> になります）</p>
+</li>
+<li>
+<p>クラス図の名前を <code>sample02のクラス図</code> に変更します</p>
+</li>
+<li>
+<p><code>Walker</code> クラスに「前進する」 <code>forward</code> メソッドを追加します</p>
+<div class="ulist">
+<ul>
+<li>
+<p>「後退する」 <code>back</code> メソッド、「停止する」 <code>stop</code> メソッドも追加しておきましょう</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>新しく追加した3つのメソッドは、可視性を <code>protected</code> にしておきます</p>
+<div class="ulist">
+<ul>
+<li>
+<p>可視性を <code>protected</code> にすると、メッソド名の前に <code>#</code> がつきます</p>
+</li>
+<li>
+<p><code>protected</code> なメソッドは <code>Walker</code> クラスの外部からは呼び出せませんが、<code>Walker</code> クラスを継承したクラスは利用できるメソッドになります</p>
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_作成したsample02のクラス図"><a class="anchor" href="#_作成したsample02のクラス図"></a>作成したsample02のクラス図</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>下図は、 <code>Motor</code> クラスと <code>Clock</code> クラスの詳細を非表示にしてあります。</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="images/sample02のクラス図_sub.png" alt="sample02のクラス図 sub" width="75%">
+</div>
+<div class="title">図 10. <code>sample02</code> のクラス図</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_sample02のコードを作成する"><a class="anchor" href="#_sample02のコードを作成する"></a>sample02のコードを作成する</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>モデル図に合わせて、コードを変更しましょう。</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>サンプルコードの <code>sample01</code> ディレクトリをそっくりコピーして <code>sample02</code> ディレクトリを作りましょう</p>
+</li>
+<li>
+<p>ファイルは分割しないで、 <code>app.cpp</code> の中に <code>Walker</code> クラスを作成しましょう</p>
+</li>
+<li>
+<p>クラス図に従って <code>Walker</code> クラスを修正します</p>
+</li>
+<li>
+<p><code>run</code> メソッドの前進している処理を抜き出して <code>forward</code> メソッドを作ります</p>
+</li>
+<li>
+<p>同様にして、 <code>back</code> メソッド、 <code>stop</code> メソッドを作ります</p>
+</li>
+<li>
+<p>追加した操作を使って <code>run</code> メソッドを修正します</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>作成したコードは次ページ以降に掲載してあります。</p>
+</div>
+<div class="paragraph">
+<p>コードが作成できたら、ビルドして、動作を確認しましょう。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-console" data-lang="console">$ cd （EV3RTのインストールディレクトリ）/hrp2/sdk/beginners
+$ make app=sample02</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>冒頭は、 <code>sample01</code> と同じです。</p>
+</div>
+<div class="listingblock">
+<div class="title">リスト 6. <code>sample02/app.cpp</code> （その１）</div>
+<div class="content">
+<pre class="prettyprint highlight linenums"><code class="language-cpp" data-lang="cpp">class Walker {
+public:
+  Walker();
+  void run();
+
+private:
+  Motor leftWheel;
+  Motor rightWheel;
+  Clock clock;
+
+  const int8_t pwm = (Motor::PWM_MAX) / 6;
+  const uint32_t duration = 2000;
+
+protected:             <i class="conum" data-value="1"></i><b>(1)</b>
+  void forward(void);  <i class="conum" data-value="2"></i><b>(2)</b>
+  void back(void);     <i class="conum" data-value="2"></i><b>(2)</b>
+  void stop(void);     <i class="conum" data-value="2"></i><b>(2)</b>
+};</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>protected</code> な属性や操作は、 <code>protected:</code> アクセス指定子から始まる領域に宣言します</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td><code>forward</code> 、 <code>back</code> 、 <code>stop</code>  メソッドを宣言しています</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="title">リスト 7. <code>sample02/app.cpp</code> （その２）</div>
+<div class="content">
+<pre class="prettyprint highlight linenums"><code class="language-cpp" data-lang="cpp">Walker::Walker():
+  leftWheel(PORT_C), rightWheel(PORT_B) {
+}
+
+void Walker::forward(void) {  <i class="conum" data-value="1"></i><b>(1)</b>
+  msg_f("Forwarding...", 1);
+  leftWheel.setPWM(pwm);
+  rightWheel.setPWM(pwm);
+}
+
+void Walker::back(void) {  <i class="conum" data-value="1"></i><b>(1)</b>
+  msg_f("Backwarding...", 1);
+  leftWheel.setPWM(-pwm);
+  rightWheel.setPWM(-pwm);
+}
+
+void Walker::stop(void) {  <i class="conum" data-value="1"></i><b>(1)</b>
+  msg_f("Stopped.", 1);
+  leftWheel.stop();
+  rightWheel.stop();
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>forward</code> 、 <code>back</code> 、 <code>stop</code>  メソッドを実装しています</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="title">リスト 8. <code>sample02/app.cpp</code> （その３）</div>
+<div class="content">
+<pre class="prettyprint highlight linenums"><code class="language-cpp" data-lang="cpp">void Walker::run() {
+  init_f(__FILE__);
+  while(1) {
+    forward();             <i class="conum" data-value="1"></i><b>(1)</b>
+    clock.sleep(duration);
+    back();                <i class="conum" data-value="1"></i><b>(1)</b>
+    clock.sleep(duration);
+
+    // 左ボタンを長押し、それを捕捉する
+    if (ev3_button_is_pressed(LEFT_BUTTON)) {
+      break;
+    }
+  }
+
+  stop();                <i class="conum" data-value="1"></i><b>(1)</b>
+  while(ev3_button_is_pressed(LEFT_BUTTON)) {
+    ;
+  }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>forward</code> 、 <code>back</code> 、 <code>stop</code>  メソッドを使って <code>run</code> メソッドを実装しています</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p><code>main_task</code> は <code>sample01</code> と同じです。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ここまでのまとめ_2"><a class="anchor" href="#_ここまでのまとめ_2"></a>ここまでのまとめ</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>sample02</code> のコードとモデル図を作成しました。</p>
+</div>
+<div class="paragraph">
+<p>この演習から何が言えるでしょうか。</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>ロボットの動作の詳細をクラスのメソッドとして追加しました</p>
+<div class="ulist">
+<ul>
+<li>
+<p>詳細な動作に「名前」がついて、目に見えるようになり、その名前で呼べるようにしました</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><code>run</code> メソッドの処理が、追加したメソッドによって、よりわかりやすくなりました</p>
+<div class="ulist">
+<ul>
+<li>
+<p>図やコードを読んだ時に、どのような動作があるかが、 <code>sample01</code> よりも明確になりました</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>クラス図を変更し、それに合わせてコードを作成しました</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>sample01</code> から <code>sample02</code> へ修正しても、クラス図とコードが対応していて、どちらで検討しても他方でも辻褄が合うことがわかります</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="end_of_chapter"><a class="anchor" href="#end_of_chapter"></a>本資料について</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>資料名： 要素技術とモデルを開発に使おう: コードとモデル図を対応づけてみよう （技術教育資料）<br>
+作成者： &#169; 2016,2017,2018,2019 by ETロボコン実行委員会<br>
+この文書は、技術教育「要素技術とモデルを開発に使おう」に使用するETロボコン公式トレーニングのテキストです。</p>
+</div>
+<div class="paragraph">
+<p>2.3, 2019-04-12 16:46:58, 2019年用</p>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+ 2.3<br>
+Last updated 2018-05-15 15:41:53 +0900
+</div>
+</div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

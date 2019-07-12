@@ -1,0 +1,18 @@
+{
+  "name": "text",
+  "version": "2.0.0",
+  "description": "text builder",
+  "main": "text01.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "ETロボコン実行委員会",
+  "license": "ETロボコン実行委員会",
+  "devDependencies": {
+    "browser-sync": "^2.12.5",
+    "gulp": "^3.9.1"
+  },
+  "dependencies": {
+    "gulp-asciidoctor": "^1.0.8"
+  }
+}

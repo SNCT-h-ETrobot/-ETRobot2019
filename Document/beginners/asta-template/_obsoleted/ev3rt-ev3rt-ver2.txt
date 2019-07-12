@@ -1,0 +1,4 @@
+*	パッケージ	ev3api
+*	クラス  	ev3api/ColorSensor
+*	クラス  	ev3api/GyroSensor
+-	クラス  	ev3api/rgb_raw_t

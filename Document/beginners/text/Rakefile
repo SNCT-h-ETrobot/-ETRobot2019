@@ -1,0 +1,154 @@
+# coding: utf-8
+require 'rake/clean'
+
+Encoding.default_external = 'utf-8'
+
+SOURCE_DIR = '../sample_cpp'
+IMAGES_DIR = 'images'
+CSS_DIR = 'css'
+IMAGES = FileList["#{IMAGES_DIR}/*.*"]
+CODES = FileList["#{SOURCE_DIR}/*.*"]
+CSSS = FileList["#{CSS_DIR}/*.*"]
+RAKEFILE = 'Rakefile'
+
+AD = 'asciidoctor'
+DECKJS = 'deckjs'
+HTML5 = 'html5'
+REVFILE = 'revdate.inc'
+FRONT_MATTER = 'front_matter.adoc'
+SRCS = FileList["text*.adoc"]
+INCS = FileList["*.inc"]
+HANDOUTS = SRCS.ext('html')
+HTMLPDFS = SRCS.ext('html.pdf')
+PDFS = SRCS.ext('pdf')
+HANDOUT_STYLE = 'mystyle.css'
+SLIDES = SRCS.pathmap('%X.slide.html') # .adoc -> .slide.html
+# 下記のhamlにはパッチが当たっているので、環境構築には注意すること
+TEMPLATE_DIR = '~/github/asciidoctor-deck.js/templates/haml'
+
+# CLEAN.include([REVFILE])
+CLOBBER.include([HANDOUTS, SLIDES])
+
+def update_revdate
+  now = Time.now.strftime("%Y-%m-%d %H:%M:%S")
+  puts "update #{REVFILE} at #{now}."
+  File.open(REVFILE, "w") do |f|
+    f.puts(":revdate: #{now}")
+  end
+end
+
+desc "Update all html and slide.html"
+task :default => [:handout, :slide, :pdf, :htmlpdf]
+
+desc "Output html for handout"
+task :handout => HANDOUTS
+
+desc "Output html for slide"
+task :slide => SLIDES
+
+desc "Output pdf from html handout"
+task :htmlpdf => HTMLPDFS
+
+desc "Output pdf of handout"
+task :pdf => PDFS
+
+def make_slide( source, target )
+  update_revdate
+  sh "#{AD} -b #{DECKJS} -T #{TEMPLATE_DIR} #{source} -o #{target}"
+end
+
+def make_handout( source, target )
+  update_revdate
+  sh "#{AD} -b #{HTML5} -a stylesheet=#{HANDOUT_STYLE} #{source} -o #{target}"
+end
+
+def make_htmlpdf( source, target )
+  update_revdate
+  # sh "wkhtmltopdf --zoom 4.0 #{source} #{target}"
+  sh "wkhtmltopdf --zoom 1.0 #{source} #{target}"
+end
+
+def make_pdf( source, target )
+  update_revdate
+  stylesdir = "#{Dir::pwd}"
+  stylefile = "mystyle-theme.yml"
+  fontsdir = "#{Dir::home}/Library/Fonts"
+  sh "asciidoctor-pdf -r asciidoctor-pdf-cjk -a pdf-stylesdir=#{stylesdir} -a pdf-style=#{stylefile} -a pdf-fontsdir=#{fontsdir} #{source} -o #{target}"
+end
+
+# asciidoc内のincludeを調べ動的に依存関係を作成するメソッドの定義（実行はあとで）
+def make_task_from_depends
+  SRCS.each do |adoc|
+    base = adoc.pathmap('%X')
+    slide = adoc.pathmap('%X.slide.html')
+    handout = adoc.pathmap('%X.html')
+    htmlpdf = adoc.pathmap('%X.html.pdf')
+    pdf = adoc.pathmap('%X.pdf')
+    depends = [adoc]
+
+    flines = IO.readlines(adoc)
+    # asciidocからincludeを収集
+    incl_docs = flines.grep(/include::/)
+    incl_docs.map! {|n| n.sub(/include::(.*)\[.*\]\n/){"#{$1}"} }
+    # codesへの依存が見つかったら依存ファイル側にSOURCE_DIRへのパスを追記する
+    incl_docs.map! {|n| n.sub(/{sourcedir}/, SOURCE_DIR) }
+    # p incl_docs
+    # asciidocからimageを収集
+    incl_images = flines.grep(/image::/)
+    incl_images.map! {|n| n.sub(/image::(.*)\[.*\]\n/){"#{$1}"} }
+    # imagesへの依存がみつかったら依存ファイル側にIMAGES_DIRへのパスを追記する
+    incl_images.map! {|n| IMAGES_DIR + '/' + n }
+    # p incl_images
+
+    # 依存する側のファイルのリストを作成
+    deps = incl_docs + incl_images
+    # ソースのasciidocのファイルも依存するファイルだから追加する
+    deps << adoc
+    # 埋め込み用の日付のファイルは必ず更新されるので、依存リストから除外
+    deps.delete(REVFILE)
+    # puts "== #{adoc} #{handout} #{deps} =="
+
+    desc "Update #{handout}"
+    file handout => deps do |t|
+      # puts "#{t.name} #{adoc} #{handout} #{deps}"
+      make_handout( adoc, handout )
+    end
+
+    desc "Update #{slide}"
+    file slide => deps do |t|
+      # puts "#{t.name} #{adoc} #{slide} #{deps}"
+      make_slide( adoc, slide )
+    end
+
+    desc "Update #{htmlpdf}"
+    file htmlpdf => deps do |t|
+      # puts "#{t.name} #{adoc} #{handout} #{pdf} #{deps}"
+      make_htmlpdf( handout, htmlpdf )
+    end
+
+    desc "Update #{pdf}"
+    file pdf => deps do |t|
+      # puts "#{t.name} #{adoc} #{handout} #{pdf} #{deps}"
+      make_pdf( adoc, pdf )
+    end
+  end
+end
+
+# make each dependancies using include, image attribute.
+make_task_from_depends
+
+
+# desc "Update Individual slide and handout"
+# task base => [slide, handout, pdf]
+
+# file slide => depends do |t|
+#   nmake_slide( adoc, slide )
+# end
+
+# file handout => depends do |t|
+#   make_handout( adoc, handout )
+# end
+
+# file pdf => handout do |t|
+#   make_pdf( handout, pdf )
+# end

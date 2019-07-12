@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.8">
+<meta name="description" content="この文書は、技術教育「要素技術とモデルを開発に使おう」に使用するETロボコン公式トレーニングのテキストです。">
+<meta name="author" content="ETロボコン実行委員会">
+<title>要素技術とモデルを開発に使おう: 倒立振子ライブラリをモデルに組込もう</title>
+<link rel="stylesheet" href="css/mystyle.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>要素技術とモデルを開発に使おう: 倒立振子ライブラリをモデルに組込もう</h1>
+<div class="details">
+<span id="author" class="author">ETロボコン実行委員会</span><br>
+<span id="email" class="email"><a href="mailto:er-info@etrobo.jp">er-info@etrobo.jp</a></span><br>
+<span id="revnumber"> 2.3,</span>
+<span id="revdate">2019-04-12 16:46:59</span>
+<br><span id="revremark">2019年用</span>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_倒立振子用に走行体を変更する"><a class="anchor" href="#_倒立振子用に走行体を変更する"></a>倒立振子用に走行体を変更する</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>この演習では、倒立振子ライブラリを使って倒立走行させますので、これまで装着していた <strong>「トレーニング用補助脚」</strong> を外します。</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="images/EV3way-ET18_s.png" alt="トレーニング用補助脚を外した走行体" width="50%">
+</div>
+<div class="title">図 1. トレーニング用補助脚を外した走行体</div>
+</div>
+<div class="openblock">
+<div class="title"><code>HackEV</code> を使っている場合:</div>
+<div class="content">
+<div class="paragraph">
+<p><code>settings_for_HackEV_user.pdf</code> の <strong>「倒立振子ライブラリを使うふりをする」</strong> をするを参照して、<strong>あたかも倒立振子が必要なシステムのように</strong> 振る舞うよう、ダミーの <code>balance_control</code> 関数を追加します。</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_sample_c4倒立振子のサンプルを試す"><a class="anchor" href="#_sample_c4倒立振子のサンプルを試す"></a>sample_c4（倒立振子のサンプル）を試す</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>倒立振子を使ったサンプル <code>sample_c4</code> を動かしてみましょう。</p>
+</div>
+<div class="paragraph">
+<div class="title"><code>sample_c4</code> は、次のサイトから入手できます:</div>
+<p><a href="https://github.com/ETrobocon/etroboEV3/tree/master/SampleCode/EV3way_EV3RT_sample">GitHubのetroboEV3のページ</a></p>
+</div>
+<div class="paragraph">
+<p>配布物にも入手して含めてありますので、そちらを使うとよいでしょう。</p>
+</div>
+<div class="olist arabic">
+<div class="title">次の手順でビルドします:</div>
+<ol class="arabic">
+<li>
+<p><code>sample_c4</code> フォルダを、EV3RTインストールディレクトリの <code>hrp2/sdk/beginners</code> の中にコピーします</p>
+</li>
+<li>
+<p>コピーしたら、コピー先のディレクトリの内容を確認しましょう</p>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-console" data-lang="console">$ cd (ev3rtのインストールディレクトリ）/hrp2/sdk/beginners
+$ ls
+Makefile  sample00/  sample01/  sample03/  sample04/  sample05/  sample_c4/
+
+$ ls sample_c4
+Makefile.inc  app.c  app.cfg  app.h  balancer.c  balancer.h  balancer_param.c  balancer_private.h</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="olist arabic">
+<ol class="arabic" start="3">
+<li>
+<p><code>beginners</code> ディレクトリでビルドします</p>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-console" data-lang="console">$ cd hrp2/sdk/beginners
+$ make app=sample_c4</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>ビルドに成功すると <code>app</code> という実行ファイルが生成されます</p>
+</li>
+</ol>
+</div>
+<div class="olist arabic">
+<div class="title">実行する手順は次の通りです:</div>
+<ol class="arabic">
+<li>
+<p>プログラムをEV3本体に転送します</p>
+</li>
+<li>
+<p>尻尾を一番上に向けてプログラムを起動します</p>
+</li>
+<li>
+<p>尻尾が完全停止位置に動きます</p>
+</li>
+<li>
+<p>画面に「EV3way-ET sample_c4」と表示されます</p>
+</li>
+<li>
+<p>走行体をラインの左エッジに配置します</p>
+</li>
+<li>
+<p>タッチセンサーを押すと走行を開始します</p>
+</li>
+<li>
+<p>走行を終了するには、EV3本体の「Back」ボタンを押します</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_sample_c4の構造をクラス図に表す"><a class="anchor" href="#_sample_c4の構造をクラス図に表す"></a>sample_c4の構造をクラス図に表す</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><strong>astah* </strong> で「sample_c4」プロジェクトを作成し、 <code>sample_c4</code> のコードをクラス図を使って整理してみましょう。</p>
+</div>
+<div class="ulist">
+<div class="title">次のような方針でクラス図を使った図に直してみます</div>
+<ul>
+<li>
+<p>ev3apiの関数群は「ev3api」クラスのメソッドと考えてクラスにまとめます</p>
+</li>
+<li>
+<p><code>main_task</code> はクラスではありませんが、この演習ではクラスを使って表すことにします<br>
+（この演習では <code>bt_task</code> については気にしないでおきます）</p>
+</li>
+<li>
+<p><code>app.c</code> で定義している他の関数は <code>app</code> クラスのメソッドと考えましょう</p>
+</li>
+<li>
+<p><code>balance_init</code> と <code>balance_control</code> は <code>balancer</code> クラスのメソッドと考えましょう</p>
+</li>
+<li>
+<p>グローバルは定数や変数は <code>app</code> クラスの属性と捉えることができますが、今回の作図では割愛しましょう</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_作成したsample_c4の構造を表したクラス図"><a class="anchor" href="#_作成したsample_c4の構造を表したクラス図"></a>作成したsample_c4の構造を表したクラス図</h2>
+<div class="sectionbody">
+<div class="imageblock text-center">
+<div class="content">
+<img src="images/sample_c4のクラス図.png" alt="sample c4のクラス図" width="75%">
+</div>
+<div class="title">図 2. <code>sample_c4</code> のクラス図</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_倒立振子ライブラリのパラメータを調べる"><a class="anchor" href="#_倒立振子ライブラリのパラメータを調べる"></a>倒立振子ライブラリのパラメータを調べる</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>操作量を算出する関数（ <code>balance_control</code> ）のパラメータをみると、その更新時期・間隔には違いがあるのがわかります。</p>
+</div>
+<div class="paragraph">
+<p>これは、使う側からすると、呼び出すのと設定するのは同じタイミングでなくてもよいという意味になります。</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="images/balacnerのインターフェースの検討.png" alt="balancer_params" width="75%">
+</div>
+<div class="title">図 3. <code>balacne_control</code> のパラメータの更新タイミング</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_倒立振子ライブラリの呼び出し方を考える"><a class="anchor" href="#_倒立振子ライブラリの呼び出し方を考える"></a>倒立振子ライブラリの呼び出し方を考える</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>更新タイミングの違いについて、次のように整理してみました。</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>GYRO_OFFSET</code> は、一度だけ取得して覚えておけばよい</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>init</code> の時に渡して覚えさせておけばよさそうです</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><code>forward</code> , <code>turn</code> は、動作を変更したい時にしか変更しない</p>
+<div class="ulist">
+<ul>
+<li>
+<p>変更時に覚えさせておけばよさそうです</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><code>gyro</code> , <code>motor_ang_l</code> , <code>motor_ang_r</code> , <code>volt</code></p>
+<div class="ulist">
+<ul>
+<li>
+<p>4msの更新のたびに最新値を取得する必要があります</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>つまり、<strong>倒立振子ライブラリのために覚えておく変数を「属性」</strong> 、 <strong>ライブラリの関数を「操作」</strong> とみなし、セットにしてクラスと考えれば、倒立振子ライブラリをクラスとして仕立てることができそうです。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>では、どのようなクラスになりそうでしょうか？</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_整理した結果から得たbalancerクラス"><a class="anchor" href="#_整理した結果から得たbalancerクラス"></a>整理した結果から得たBalancerクラス</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>検討の結果、次のようなクラスを作ることにしました。</p>
+</div>
+<div class="paragraph">
+<p>属性やメソッド説明は次のページにあります。</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="images/balancerクラスの図.png" alt="balancer_snap" width="75%">
+</div>
+<div class="title">図 4. 整理した結果から得た <code>Balancer</code> クラス</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_balancerクラスの説明"><a class="anchor" href="#_balancerクラスの説明"></a>Balancerクラスの説明</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><code>gyro</code> , <code>motor_ang_l</code> , <code>motor_ang_r</code> , <code>volt</code> は <code>update</code> メソッドに渡します</p>
+<div class="ulist">
+<ul>
+<li>
+<p>このメソッドを呼び出すと <code>balance_contol</code> が呼び出されて操作量を計算します</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>操作量の計算結果は、属性 <code>mLeftPwm</code>、 <code>mRightPwm</code> に保存しておきます</p>
+<div class="ulist">
+<ul>
+<li>
+<p>この属性があると、クラスの利用者は、最後に <code>update</code> メソッドを呼び出した時の計算結果を <code>getPwnLeft</code> 、 <code>getPwmRight</code> メソッドを使って参照できるようになります</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><code>GYRO_OFFSET</code> は <code>init</code> メソッドに渡して、属性に保存しておきます</p>
+</li>
+<li>
+<p><code>forward</code>, <code>turn</code> は <code>setCommand</code> メソッドに渡して、属性に保存しておきます</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_sample_cpp4の構造をクラス図に表す"><a class="anchor" href="#_sample_cpp4の構造をクラス図に表す"></a>sample_cpp4の構造をクラス図に表す</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>作成した <code>Balancer</code> クラスを使用したクラス図を描きましょう。</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><code>sample_c4.asta</code> をコピーして <code>sample_cpp4.asta</code> を用意します</p>
+</li>
+<li>
+<p><code>sample_c4のクラス図</code> を <code>sample_cpp4のクラス図</code> に変更します</p>
+</li>
+<li>
+<p><code>Balancer</code> クラスを追加します。</p>
+</li>
+<li>
+<p>関連を引き直します</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_作成した_sample_cpp4のクラス図"><a class="anchor" href="#_作成した_sample_cpp4のクラス図"></a>作成した sample_cpp4のクラス図</h2>
+<div class="sectionbody">
+<div class="imageblock text-center">
+<div class="content">
+<img src="images/sample_cpp4のクラス図.png" alt="sample_cpp4" width="100%">
+</div>
+<div class="title">図 5. <code>Balancer</code> クラスを追加した <code>sample_cpp4</code> のクラス図</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_sample_cpp4のコードを作成する準備"><a class="anchor" href="#_sample_cpp4のコードを作成する準備"></a>sample_cpp4のコードを作成する準備</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>C&#43;&#43; のクラスを追加するので、コードを修正するため前に少し準備しましょう。</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><code>sample_c4</code> ディレクトリをそのままコピーして <code>sample_cpp4</code> ディレクトリを作成します</p>
+</li>
+<li>
+<p><code>app.c</code> は、 C&#43;&#43; のコードを扱うので <code>app.cpp</code> に変更します</p>
+</li>
+<li>
+<p><code>Makefile.inc</code> を次のように編集します</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="title">リスト 1. <code>Makefile.inc</code> の抜粋</div>
+<div class="content">
+<pre class="prettyprint highlight linenums"><code class="language-makefile" data-lang="makefile">APPL_COBJS += balancer.o balancer_param.o
+
+APPL_CXXOBJS += BalancerCpp.o  <i class="conum" data-value="1"></i><b>(1)</b>
+
+SRCLANG := c++   <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>C&#43;&#43; オブジェクトとして <code>BalancerCpp.o</code> を追加します</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>C&#43;&#43; 用の言語設定を追加します</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>修正できたら、ビルドしてみて、修正前と同じように動作するか確認しておきましょう。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_balancercpp_hを追加する"><a class="anchor" href="#_balancercpp_hを追加する"></a>BalancerCpp.hを追加する</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>sample_cpp4</code> ディレクトリに <code>Balancer</code> クラスのヘッダファイルを作成します。<br>
+既存の <code>balance</code> 関数のファイルと区別するため、ファイル名を <code>BalancerCpp.h</code> としました。</p>
+</div>
+<div class="listingblock">
+<div class="title">リスト 2. <code>BalancerCpp.h</code></div>
+<div class="content">
+<pre class="prettyprint highlight linenums"><code class="language-cpp" data-lang="cpp">#ifndef EV3_UNIT_BALANCERCPP_H_
+#define EV3_UNIT_BALANCERCPP_H_
+
+#include "ev3api.h"
+
+class Balancer {
+public:
+  Balancer();
+
+  void init(int offset);
+  void update(int angle, int rwEnc, int lwEnc, int battery);
+  void setCommand(int forward, int turn);
+  int8_t getPwmRight();
+  int8_t getPwmLeft();
+
+private:
+  int mForward;
+  int mTurn;
+  int mOffset;
+  int8_t mRightPwm;
+  int8_t mLeftPwm;
+
+  void cancelBacklash(int&amp; rwEnc, int&amp; lwEnc);
+};
+
+#endif  // EV3_UNIT_BALANCERCPP_H_</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_balancercpp_cppを追加する"><a class="anchor" href="#_balancercpp_cppを追加する"></a>BalancerCpp.cppを追加する</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>sample_cpp4</code> ディレクトリに <code>Balancer</code> クラスのcppファイルを作成します。<br>
+既存の <code>balance</code> 関数のファイルと区別するため、ファイル名を <code>BalancerCpp.cpp</code> としました。</p>
+</div>
+<div class="listingblock">
+<div class="title">リスト 3. <code>BalancerCpp.cpp</code></div>
+<div class="content">
+<pre class="prettyprint highlight linenums"><code class="language-cpp" data-lang="cpp">#include "balancer.h"
+#include "BalancerCpp.h"
+
+/**
+ * コンストラクタ
+ */
+Balancer::Balancer()
+  : mForward(0),   mTurn(0),   mOffset(0),  mRightPwm(0),  mLeftPwm(0) {
+}
+
+/**
+ * バランサーを初期化する
+ * @param offset ジャイロセンサオフセット値
+ */
+void Balancer::init(int offset) {
+  mOffset = offset;
+  balance_init();  // 倒立振子制御初期化
+}
+
+/**
+ * バックラッシュキャンセル
+ * @note          直近のPWM値に応じてエンコーダ値にバックラッシュ分の値を追加します
+ * @param rwEnc   右車輪エンコーダ値
+ * @param lwEnc   左車輪エンコーダ値
+ * @date          2017/10/24
+ * @author        Koji SHIMIZU
+ */
+void Balancer::cancelBacklash(int&amp; rwEnc, int&amp; lwEnc)
+{
+  const int BACKLASHHALF = 4;   // バックラッシュの半分[deg]
+
+  if(mRightPwm &lt; 0) rwEnc += BACKLASHHALF;
+  else if(mRightPwm &gt; 0) rwEnc -= BACKLASHHALF;
+
+  if(mLeftPwm &lt; 0) lwEnc += BACKLASHHALF;
+  else if(mLeftPwm &gt; 0) lwEnc -= BACKLASHHALF;
+}
+
+/**
+ * バランサーの値を更新する
+ * @param angle   角速度
+ * @param rwEnc   右車輪エンコーダー値
+ * @param lwEnc   左車輪エンコーダー値
+ * @param battery バッテリー電圧値
+ */
+void Balancer::update(int angle, int rwEnc, int lwEnc, int battery) {
+  cancelBacklash(lwEnc, rwEnc); // バックラッシュキャンセル
+  // 倒立振子制御APIを呼び出し、倒立走行するための
+  // 左右モーター出力値を得る
+  balance_control (
+     static_cast&lt;float&gt;(mForward),
+     static_cast&lt;float&gt;(mTurn),
+     static_cast&lt;float&gt;(angle),
+     static_cast&lt;float&gt;(mOffset),
+     static_cast&lt;float&gt;(lwEnc),
+     static_cast&lt;float&gt;(rwEnc),
+     static_cast&lt;float&gt;(battery),
+     &amp;mLeftPwm,
+     &amp;mRightPwm);
+}
+
+/**
+ * 前進値、旋回値を設定する
+ * @param forward 前進値
+ * @param turn    旋回値
+ */
+void Balancer::setCommand(int forward, int turn) {
+  mForward = forward;
+  mTurn    = turn;
+}
+
+/**
+ * 右車輪のPWM値を取得する
+ * @return 右車輪のPWM値
+ */
+int8_t Balancer::getPwmRight() {
+  return mRightPwm;
+}
+
+/**
+ * 左車輪のPWM値を取得する
+ * @return 左車輪のPWM値
+ */
+int8_t Balancer::getPwmLeft() {
+  return mLeftPwm;
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_app_cppを修正する"><a class="anchor" href="#_app_cppを修正する"></a>app.cppを修正する</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>作成した <code>Balancer</code> クラスを使って、 <code>app.cpp</code> のコードを修正しましょう</p>
+</div>
+<div class="listingblock">
+<div class="title">リスト 4. <code>app.cpp</code> （抜粋その１）</div>
+<div class="content">
+<pre class="prettyprint highlight linenums"><code class="language-cpp" data-lang="cpp">/* 関数プロトタイプ宣言 */
+static int sonar_alert(void);
+static void tail_control(signed int angle);
+
+#include "BalancerCpp.h"        <i class="conum" data-value="1"></i><b>(1)</b>
+Balancer balancer;              <i class="conum" data-value="1"></i><b>(1)</b>
+
+/* メインタスク */
+void main_task(intptr_t unused)
+{</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>追加した <code>Balancer</code> クラスのインスタンスを作成しています</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="title">リスト 5. <code>app.cpp</code> （抜粋その２）</div>
+<div class="content">
+<pre class="prettyprint highlight linenums"><code class="language-cpp" data-lang="cpp">  /* ジャイロセンサーリセット */
+  ev3_gyro_sensor_reset(gyro_sensor);
+  balancer.init(GYRO_OFFSET);                <i class="conum" data-value="1"></i><b>(1)</b>
+
+  ev3_led_set_color(LED_GREEN); /* スタート通知 */</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>Balancer</code> クラスの <code>init</code> メソッドを呼び出しています<br>
+（GYRO_OFFSETを渡しています）</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="title">リスト 6. <code>app.cpp</code> （抜粋その３）</div>
+<div class="content">
+<pre class="prettyprint highlight linenums"><code class="language-cpp" data-lang="cpp">      /* 倒立振子制御API に渡すパラメータを取得する */
+      motor_ang_l = ev3_motor_get_counts(left_motor);
+      motor_ang_r = ev3_motor_get_counts(right_motor);
+      gyro = ev3_gyro_sensor_get_rate(gyro_sensor);
+      volt = ev3_battery_voltage_mV();
+
+      /* 倒立振子制御APIを呼び出し、倒立走行するための */
+      /* 左右モータ出力値を得る */
+      balancer.setCommand(forward, turn);   <i class="conum" data-value="1"></i><b>(1)</b>
+      balancer.update(gyro, motor_ang_r, motor_ang_l, volt); <i class="conum" data-value="2"></i><b>(2)</b>
+      pwm_R = balancer.getPwmRight();       <i class="conum" data-value="3"></i><b>(3)</b>
+      pwm_L = balancer.getPwmLeft();        <i class="conum" data-value="3"></i><b>(3)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>走行の指示として、前進値 <code>forward</code> と, 旋回値 <code>turn</code> を設定しています<br>
+（ここでは元のプログラムの構造上毎回呼んでいますが、本来は走行指示に変更があった時だけ呼べばよいはずです）</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>センサーの最新値をbalancerライブラリへ渡して、操作量を再計算しています</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>算出した操作量をモーターに渡す変数に設定しています</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>修正が済んだら、ビルドして、動作を確認しましょう。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ここまでのまとめ"><a class="anchor" href="#_ここまでのまとめ"></a>ここまでのまとめ</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>要素技術を検討して得られたC言語で作成した既存のライブラリ（この演習では倒立振子ライブラリ）をシステムのモデルに組込むため、クラスに仕立てる方法を演習しました。</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>パラメータの更新機会に着目して、同時に必要なものをまとめました</p>
+</li>
+<li>
+<p>更新機会が少ないパラメータは、クラスの属性に保持することで覚えておけます</p>
+</li>
+<li>
+<p>更新機会に応じてメソッドを分けることで、一度の呼び出に必要なパラメータを減らすことができます</p>
+</li>
+<li>
+<p>パラメータを属性に保持することで、メソッドのインターフェースが必要最小限に抑えられます</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_トレーニングのまとめ"><a class="anchor" href="#_トレーニングのまとめ"></a>トレーニングのまとめ</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>このトレーニングでは、モデルとコードの対応づけ、要素技術をモデル図に反映する方法について演習しました。</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>コードのありのままの状況を整理するのにもモデル図が使えることがわかりました</p>
+</li>
+<li>
+<p>モデルとコードを対応づけていれば、双方向に利用できることがわかりました</p>
+<div class="ulist">
+<ul>
+<li>
+<p>モデルで考えることもコードから設計（モデル）に戻って検討することもできます</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>要素技術を利用するときは、実験と組込みを区別して考えましょう</p>
+</li>
+<li>
+<p>要素技術をシステムに組込むには、モデル図の要素としての名前（クラスや操作など）をつけて、モデル図から読み取れるようにしましょう</p>
+<div class="ulist">
+<ul>
+<li>
+<p>倒立振子ライブラリも要素技術のひとつとして、モデル図に組み込めることがわかりました</p>
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>このトレーニングの結果を活かして、より見通しのよいシステムやモデル図が作成できるようになることを期待しています。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="end_of_chapter"><a class="anchor" href="#end_of_chapter"></a>本資料について</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>資料名： 要素技術とモデルを開発に使おう: 倒立振子ライブラリをモデルに組込もう （技術教育資料）<br>
+作成者： &#169; 2016,2017,2018,2019 by ETロボコン実行委員会<br>
+この文書は、技術教育「要素技術とモデルを開発に使おう」に使用するETロボコン公式トレーニングのテキストです。</p>
+</div>
+<div class="paragraph">
+<p>2.3, 2019-04-12 16:46:59, 2019年用</p>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+ 2.3<br>
+Last updated 2018-05-15 15:41:54 +0900
+</div>
+</div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

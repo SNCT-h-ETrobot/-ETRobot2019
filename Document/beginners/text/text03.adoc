@@ -1,0 +1,312 @@
+= 要素技術とモデルを開発に使おう: 倒立振子ライブラリをモデルに組込もう
+include::revdate.inc[]
+include::front_matter.adoc[]
+include::image_size_matter.adoc[]
+
+== 倒立振子用に走行体を変更する
+
+この演習では、倒立振子ライブラリを使って倒立走行させますので、これまで装着していた *「トレーニング用補助脚」* を外します。
+
+.トレーニング用補助脚を外した走行体
+image::EV3way-ET18_s.png[トレーニング用補助脚を外した走行体,{half-width},{image-align}]
+
+
+.`HackEV` を使っている場合:
+--
+`settings_for_HackEV_user.pdf` の *「倒立振子ライブラリを使うふりをする」* をするを参照して、*あたかも倒立振子が必要なシステムのように* 振る舞うよう、ダミーの `balance_control` 関数を追加します。
+--
+
+== sample_c4（倒立振子のサンプル）を試す
+
+倒立振子を使ったサンプル `sample_c4` を動かしてみましょう。
+
+.`sample_c4` は、次のサイトから入手できます:
+https://github.com/ETrobocon/etroboEV3/tree/master/SampleCode/EV3way_EV3RT_sample[GitHubのetroboEV3のページ]
+
+配布物にも入手して含めてありますので、そちらを使うとよいでしょう。
+
+.次の手順でビルドします:
+. `sample_c4` フォルダを、EV3RTインストールディレクトリの `hrp2/sdk/beginners` の中にコピーします
+. コピーしたら、コピー先のディレクトリの内容を確認しましょう
++
+[source,console]
+-------------------------------------------
+$ cd (ev3rtのインストールディレクトリ）/hrp2/sdk/beginners
+$ ls
+Makefile  sample00/  sample01/  sample03/  sample04/  sample05/  sample_c4/
+
+$ ls sample_c4
+Makefile.inc  app.c  app.cfg  app.h  balancer.c  balancer.h  balancer_param.c  balancer_private.h
+-------------------------------------------
+
+ifdef::backend-deckjs[]
+<<<
+endif::[]
+
+[start=3]
+. `beginners` ディレクトリでビルドします
++
+[source,console]
+----
+$ cd hrp2/sdk/beginners
+$ make app=sample_c4
+----
+. ビルドに成功すると `app` という実行ファイルが生成されます
+
+
+.実行する手順は次の通りです:
+. プログラムをEV3本体に転送します
+. 尻尾を一番上に向けてプログラムを起動します
+. 尻尾が完全停止位置に動きます
+. 画面に「EV3way-ET sample_c4」と表示されます
+. 走行体をラインの左エッジに配置します
+. タッチセンサーを押すと走行を開始します
+. 走行を終了するには、EV3本体の「Back」ボタンを押します
+
+== sample_c4の構造をクラス図に表す
+
+**astah* ** で「sample_c4」プロジェクトを作成し、 `sample_c4` のコードをクラス図を使って整理してみましょう。
+
+
+.次のような方針でクラス図を使った図に直してみます
+* ev3apiの関数群は「ev3api」クラスのメソッドと考えてクラスにまとめます
+* `main_task` はクラスではありませんが、この演習ではクラスを使って表すことにします +
+（この演習では `bt_task` については気にしないでおきます）
+* `app.c` で定義している他の関数は `app` クラスのメソッドと考えましょう
+* `balance_init` と `balance_control` は `balancer` クラスのメソッドと考えましょう
+* グローバルは定数や変数は `app` クラスの属性と捉えることができますが、今回の作図では割愛しましょう
+
+== 作成したsample_c4の構造を表したクラス図
+
+.`sample_c4` のクラス図
+image::sample_c4のクラス図.png[{three-quarters-width},{image-align}]
+
+== 倒立振子ライブラリのパラメータを調べる
+
+操作量を算出する関数（ `balance_control` ）のパラメータをみると、その更新時期・間隔には違いがあるのがわかります。
+
+
+これは、使う側からすると、呼び出すのと設定するのは同じタイミングでなくてもよいという意味になります。
+
+.`balacne_control` のパラメータの更新タイミング
+image::balacnerのインターフェースの検討.png[balancer_params,{three-quarters-width},{image-align}]
+
+
+== 倒立振子ライブラリの呼び出し方を考える
+
+更新タイミングの違いについて、次のように整理してみました。
+
+* `GYRO_OFFSET` は、一度だけ取得して覚えておけばよい
+** `init` の時に渡して覚えさせておけばよさそうです
+* `forward` , `turn` は、動作を変更したい時にしか変更しない
+** 変更時に覚えさせておけばよさそうです
+* `gyro` , `motor_ang_l` , `motor_ang_r` , `volt`
+** 4msの更新のたびに最新値を取得する必要があります
+
+つまり、*倒立振子ライブラリのために覚えておく変数を「属性」* 、 *ライブラリの関数を「操作」* とみなし、セットにしてクラスと考えれば、倒立振子ライブラリをクラスとして仕立てることができそうです。
+
+----
+では、どのようなクラスになりそうでしょうか？
+----
+
+== 整理した結果から得たBalancerクラス
+
+検討の結果、次のようなクラスを作ることにしました。
+
+属性やメソッド説明は次のページにあります。
+
+.整理した結果から得た `Balancer` クラス
+image::balancerクラスの図.png[balancer_snap,{three-quarters-width},{image-align}]
+
+== Balancerクラスの説明
+
+* `gyro` , `motor_ang_l` , `motor_ang_r` , `volt` は `update` メソッドに渡します
+** このメソッドを呼び出すと `balance_contol` が呼び出されて操作量を計算します
+* 操作量の計算結果は、属性 `mLeftPwm`、 `mRightPwm` に保存しておきます
+** この属性があると、クラスの利用者は、最後に `update` メソッドを呼び出した時の計算結果を `getPwnLeft` 、 `getPwmRight` メソッドを使って参照できるようになります
+* `GYRO_OFFSET` は `init` メソッドに渡して、属性に保存しておきます
+* `forward`, `turn` は `setCommand` メソッドに渡して、属性に保存しておきます
+
+== sample_cpp4の構造をクラス図に表す
+
+作成した `Balancer` クラスを使用したクラス図を描きましょう。
+
+. `sample_c4.asta` をコピーして `sample_cpp4.asta` を用意します
+. `sample_c4のクラス図` を `sample_cpp4のクラス図` に変更します
+. `Balancer` クラスを追加します。
+. 関連を引き直します
+
+== 作成した sample_cpp4のクラス図
+
+.`Balancer` クラスを追加した `sample_cpp4` のクラス図
+image::sample_cpp4のクラス図.png[sample_cpp4,{full-width},{image-align}]
+
+
+== sample_cpp4のコードを作成する準備
+
+{cpp} のクラスを追加するので、コードを修正するため前に少し準備しましょう。
+
+. `sample_c4` ディレクトリをそのままコピーして `sample_cpp4` ディレクトリを作成します
+. `app.c` は、 {cpp} のコードを扱うので `app.cpp` に変更します
+. `Makefile.inc` を次のように編集します
+
+[source,makefile,numbered]
+.`Makefile.inc` の抜粋
+----
+APPL_COBJS += balancer.o balancer_param.o
+
+APPL_CXXOBJS += BalancerCpp.o  # <1>
+
+SRCLANG := c++   # <2>
+----
+<1> {cpp} オブジェクトとして `BalancerCpp.o` を追加します
+<2> {cpp} 用の言語設定を追加します
+
+修正できたら、ビルドしてみて、修正前と同じように動作するか確認しておきましょう。
+
+== BalancerCpp.hを追加する
+
+`sample_cpp4` ディレクトリに `Balancer` クラスのヘッダファイルを作成します。 +
+既存の `balance` 関数のファイルと区別するため、ファイル名を `BalancerCpp.h` としました。
+
+ifdef::backend-deckjs[]
+[source,cpp,linenums,start=9]
+.`BalancerCpp.h` （その１）
+----
+include::{sourcedir}/sample_cpp4/BalancerCpp.h[lines=9..22]
+----
+
+ifdef::backend-deckjs[]
+<<<
+endif::[]
+
+[source,cpp,linenums,start=24]
+.`BalancerCpp.h` （その２）
+----
+include::{sourcedir}/sample_cpp4/BalancerCpp.h[lines=24..-1]
+----
+endif::[]
+
+ifdef::backend-html5,backend-pdf[]
+[source,cpp,linenums,start=9]
+.`BalancerCpp.h`
+----
+include::{sourcedir}/sample_cpp4/BalancerCpp.h[lines=9..-1]
+----
+endif::[]
+
+== BalancerCpp.cppを追加する
+
+`sample_cpp4` ディレクトリに `Balancer` クラスのcppファイルを作成します。 +
+既存の `balance` 関数のファイルと区別するため、ファイル名を `BalancerCpp.cpp` としました。
+
+ifdef::backend-deckjs[]
+[source,cpp,linenums,start=9]
+.`BalancerCpp.cpp` （その１）
+----
+include::{sourcedir}/sample_cpp4/BalancerCpp.cpp[lines=9..26]
+----
+
+ifdef::backend-deckjs[]
+<<<
+endif::[]
+
+[source,cpp,linenums,start=28]
+.`BalancerCpp.cpp` （その２）
+----
+include::{sourcedir}/sample_cpp4/BalancerCpp.cpp[lines=28..45]
+----
+
+ifdef::backend-deckjs[]
+<<<
+endif::[]
+
+[source,cpp,linenums,start=47]
+.`BalancerCpp.cpp` （その３）
+----
+include::{sourcedir}/sample_cpp4/BalancerCpp.cpp[lines=47..68]
+----
+
+ifdef::backend-deckjs[]
+<<<
+endif::[]
+
+[source,cpp,linenums,start=70]
+.`BalancerCpp.cpp` （その４）
+----
+include::{sourcedir}/sample_cpp4/BalancerCpp.cpp[lines=70..-1]
+----
+endif::[]
+
+ifdef::backend-html5,backend-pdf[]
+[source,cpp,linenums,start=9]
+.`BalancerCpp.cpp`
+----
+include::{sourcedir}/sample_cpp4/BalancerCpp.cpp[lines=9..-1]
+----
+endif::[]
+
+== app.cppを修正する
+
+作成した `Balancer` クラスを使って、 `app.cpp` のコードを修正しましょう
+
+[source,cpp,linenums,start=68]
+.`app.cpp` （抜粋その１）
+----
+include::{sourcedir}/sample_cpp4/app.cpp[lines=68..77]
+----
+<1> 追加した `Balancer` クラスのインスタンスを作成しています
+
+
+ifdef::backend-deckjs[]
+<<<
+endif::[]
+
+
+[source,cpp,linenums,start=129]
+.`app.cpp` （抜粋その２）
+----
+include::{sourcedir}/sample_cpp4/app.cpp[lines=129..133]
+----
+<1> `Balancer` クラスの `init` メソッドを呼び出しています +
+（GYRO_OFFSETを渡しています）
+
+ifdef::backend-deckjs[]
+<<<
+endif::[]
+
+[source,cpp,linenums,start=164]
+.`app.cpp` （抜粋その３）
+----
+include::{sourcedir}/sample_cpp4/app.cpp[lines=164..176]
+----
+<1> 走行の指示として、前進値 `forward` と, 旋回値 `turn` を設定しています +
+（ここでは元のプログラムの構造上毎回呼んでいますが、本来は走行指示に変更があった時だけ呼べばよいはずです）
+<2> センサーの最新値をbalancerライブラリへ渡して、操作量を再計算しています
+<3> 算出した操作量をモーターに渡す変数に設定しています
+
+修正が済んだら、ビルドして、動作を確認しましょう。
+
+== ここまでのまとめ
+
+要素技術を検討して得られたC言語で作成した既存のライブラリ（この演習では倒立振子ライブラリ）をシステムのモデルに組込むため、クラスに仕立てる方法を演習しました。
+
+* パラメータの更新機会に着目して、同時に必要なものをまとめました
+* 更新機会が少ないパラメータは、クラスの属性に保持することで覚えておけます
+* 更新機会に応じてメソッドを分けることで、一度の呼び出に必要なパラメータを減らすことができます
+* パラメータを属性に保持することで、メソッドのインターフェースが必要最小限に抑えられます
+
+== トレーニングのまとめ
+
+このトレーニングでは、モデルとコードの対応づけ、要素技術をモデル図に反映する方法について演習しました。
+
+. コードのありのままの状況を整理するのにもモデル図が使えることがわかりました
+. モデルとコードを対応づけていれば、双方向に利用できることがわかりました
+** モデルで考えることもコードから設計（モデル）に戻って検討することもできます
+. 要素技術を利用するときは、実験と組込みを区別して考えましょう
+. 要素技術をシステムに組込むには、モデル図の要素としての名前（クラスや操作など）をつけて、モデル図から読み取れるようにしましょう
+** 倒立振子ライブラリも要素技術のひとつとして、モデル図に組み込めることがわかりました
+
+このトレーニングの結果を活かして、より見通しのよいシステムやモデル図が作成できるようになることを期待しています。
+
+include::colophon.inc[]

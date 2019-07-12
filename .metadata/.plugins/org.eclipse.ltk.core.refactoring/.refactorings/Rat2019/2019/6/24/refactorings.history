@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy 3 packages to &apos;leJOS_Template/src&apos;&#x0D;&#x0A;- 元のプロジェクト: &apos;Rat2019&apos;&#x0D;&#x0A;- 宛先要素: &apos;leJOS_Template/src&apos;&#x0D;&#x0A;- オリジナル要素:&#x0D;&#x0A;     Rat2019/src/Main&#x0D;&#x0A;     Rat2019/src/RatSensors&#x0D;&#x0A;     Rat2019/src/RatMotors" description="パッケージのコピー" destination="=leJOS_Template/src" element1="/src&lt;Main" element2="/src&lt;RatSensors" element3="/src&lt;RatMotors" flags="589830" fragments="3" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyPackages" stamp="1560238968101" version="1.0"/>
+</session>

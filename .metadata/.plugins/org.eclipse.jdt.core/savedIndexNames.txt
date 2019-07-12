@@ -1,0 +1,16 @@
+INDEX VERSION 1.131+C:\Users\user\Projects\remote\-ETRobot2019\.metadata\.plugins\org.eclipse.jdt.core
+1270471793.index
+4259803440.index
+2381463495.index
+766471518.index
+3260258960.index
+502545106.index
+1376012734.index
+1927823717.index
+2130124521.index
+3653873709.index
+3687886663.index
+1708149769.index
+4244292808.index
+1049507789.index
+164334391.index

@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible" />
+<meta content="Asciidoctor 1.5.8" name="generator" />
+<meta content="この文書は、技術教育「要素技術とモデルを開発に使おう」に使用するETロボコン公式トレーニングのテキストです。" name="description" />
+<meta content="ETロボコン実行委員会" name="author" />
+<title>要素技術とモデルを開発に使おう: 背景と準備</title>
+<link href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/3.2.1/css/font-awesome.min.css" rel="stylesheet" />
+<style>
+.conum { display: inline-block; color: white !important; background-color: #222222; -webkit-border-radius: 100px; border-radius: 100px; text-align: center; width: 1.2em; height: 1.2em; font-size: 0.9em; font-weight: bold; line-height: 1.2; font-family: Arial, sans-serif; font-style: normal; position: relative; top: -0.1em; }
+.conum * { color: white !important; }
+.conum + b { display: none; }
+.conum:after { content: attr(data-value); }
+.conum:not([data-value]):empty { display: none; }
+.colist table td:first-of-type { padding-right: 0.25em; }
+</style>
+<link href="http://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css" rel="stylesheet" />
+<script src="http://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
+<script>document.addEventListener('DOMContentLoaded', prettyPrint)</script>
+<link href="deck.js/core/deck.core.css" rel="stylesheet" />
+<link href="deck.js/extensions/scale/deck.scale.css" media="screen" rel="stylesheet" />
+<link href="deck.js/extensions/goto/deck.goto.css" media="screen" rel="stylesheet" />
+<link href="deck.js/extensions/menu/deck.menu.css" media="screen" rel="stylesheet" />
+<link href="deck.js/extensions/navigation/deck.navigation.css" media="screen" rel="stylesheet" />
+<link href="deck.js/extensions/status/deck.status.css" media="screen" rel="stylesheet" />
+<link href="deck.js/themes/style/mystyle.css" media="screen" rel="stylesheet" />
+<link href="deck.js/themes/transition/fade.css" media="screen" rel="stylesheet" />
+<link href="deck.js/core/print.css" media="print" rel="stylesheet" />
+<script src="deck.js/modernizr.custom.js"></script>
+</head>
+<body class="article">
+<div class="deck-container">
+<section class="slide" id="title-slide">
+<h1>要素技術とモデルを開発に使おう: 背景と準備</h1>
+<span id="author">ETロボコン実行委員会</span>
+<br />
+<span id="email"><a href="mailto:er-info@etrobo.jp">er-info@etrobo.jp</a></span>
+<br />
+<span id="revnumber"> 2.3,</span>
+<span id="revdate">2019-04-12 16:46:59</span>
+<br />
+<span id="revremark">2019年用</span>
+</section>
+<section class="slide" id="_この教材について">
+<h2>この教材について</h2>
+<section class="slide" id="_目的">
+<h2>目的</h2>
+<div class="ulist">
+<ul>
+<li>この教材は、ETロボコンに参加されるみなさんに、モデル作成に必要となる知識やスキル取得の機会を提供することを目的に作成しています</li>
+</ul>
+</div>
+</section>
+<section class="slide" id="_著作">
+<h2>著作</h2>
+<div class="ulist">
+<ul>
+<li>この教材はETロボコン実行委員会が作成したものです</li>
+<li>この教材の著作権は、ETロボコン実行委員会に帰属します</li>
+</ul>
+</div>
+</section>
+<section class="slide" id="_使用について">
+<h2>使用について</h2>
+<div class="ulist">
+<ul>
+<li>ETロボコンの参加資格（企業・大学・個人）の範囲内に限り、ご自由に活用していただいてかまいません</li>
+</ul>
+</div>
+</section>
+</section>
+<section class="slide" id="_はじめに">
+<h2>はじめに</h2>
+<section class="slide" id="_本コースの想定する受講者">
+<h2>本コースの想定する受講者</h2>
+<div class="paragraph"><p>C言語/C&#43;&#43;言語、あるいはこれらに類似の言語のプログラミング経験はあるが、モデルを使った開発経験のないエンジニア</p></div>
+</section>
+<section class="slide" id="_トレーニングのゴール">
+<h2>トレーニングのゴール</h2>
+<div class="ulist">
+<ul>
+<li>モデルとコードのつながりを知っている</li>
+<li>要素技術をモデルに組込んで使える</li>
+</ul>
+</div>
+</section>
+<section class="slide" id="_トレーニングの進め方">
+<h2>トレーニングの進め方</h2>
+<div class="ulist">
+<ul>
+<li>コードの状況をモデルで表すことで、モデルが表すものを実感します</li>
+<li>モデルとコードを並行して編集し、モデルとコードの対応づけを学びます</li>
+<li>要素技術を実験してからモデルに組込み、そのモデルからコードを作成します</li>
+</ul>
+</div>
+</section>
+</section>
+<section class="slide" id="_このコースの背景">
+<h2>このコースの背景</h2>
+<div class="paragraph"><p>このコース「要素技術とモデルを開発に使おう」は、次のことを主眼に作成してあります。</p></div>
+<div class="ulist">
+<ul>
+<li>コードを書くのにモデル図が役に立つことを実感してもらうこと</li>
+<li>要素技術をモデル図に反映する方法について学ぶこと</li>
+</ul>
+</div>
+<section class="slide" id="_コース提供の経緯">
+<h2>コース提供の経緯</h2>
+<div class="paragraph"><p>モデリングの演習に、倒立振子ロボットを使うと、次のようなことが起きました。</p></div>
+<div class="ulist">
+<ul>
+<li>2輪倒立で立たせることにばかり気をとられてしまう</li>
+<li>モデルに合うコードではなく、頭で考えたことに合うコードを書いている</li>
+</ul>
+</div>
+<div class="paragraph"><p>一方、モデリング演習を通じて学んでほしいのは、次のようなことでした。</p></div>
+<div class="ulist">
+<ul>
+<li>課題があったとき、それをモデルで表現する、モデルで考える</li>
+<li>コードはモデルに合わせて書く</li>
+<li>要素技術をモデルに組込むことで結びつける</li>
+</ul>
+</div>
+<div class="paragraph"><p>つまり、学んでほしいことに集中できない状況だったわけです。</p></div>
+</section>
+</section>
+<section class="slide" id="_このコースで学んでほしいことはなにか">
+<h2>このコースで学んでほしいことはなにか</h2>
+<div class="paragraph"><p>そこで、次のようなことを理解する演習を提供するほうがよいのではないか、ということになりました。</p></div>
+<div class="ulist">
+<ul>
+<li>コードを書くのに図が使えることを実感する</li>
+<li>要素技術の実験結果をモデル図に組込む方法を使ってみる</li>
+</ul>
+</div>
+<div class="paragraph"><p>一方で、次のことを敢えてやらないことにしました。</p></div>
+<div class="ulist">
+<ul>
+<li>オブジェクト指向の考え方を解説する</li>
+<li>UMLの記法について解説する</li>
+<li>開発プロセスに関して講義する</li>
+</ul>
+</div>
+<div class="paragraph"><p>これらのことは、このコースでコードを書くのに図が使えることを知った上で、技術教育2の <strong>「開発プロセスに沿って開発する」</strong> で学ぶことにします。</p></div>
+<div style="page-break-after: always"></div>
+<div class="paragraph"><p>そのために、次のような内容の演習を用意することになりました。</p></div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>コードのやっていることを表すのにモデル図が使えることを実感する</p>
+<div class="ulist">
+<ul>
+<li>最初は倒立振子なしサンプルのコードを元にモデル図で表してみる</li>
+<li>モデル図を使って現状を見直し、それに合わせてコードの構造も見直す</li>
+</ul>
+</div>
+</li>
+<li>
+<p>要素技術を実験しアプリケーションに組込むまでをやってみる</p>
+<div class="ulist">
+<ul>
+<li>簡単なライントレーサーで、要素技術の必要性を感じる</li>
+<li>要素技術として、比例制御を使えるかどうか実験する</li>
+<li>実験した結果をモデル図に反映し、それに合わせてコードにも反映する</li>
+<li>2輪倒立のライブラリを組み込んで倒立走行させる</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph"><p>このコース <strong>「要素技術とモデルを開発に使おう」</strong> は、以上のように構成されています。</p></div>
+</section>
+<section class="slide" id="_目次">
+<h2>目次</h2>
+<div class="ulist">
+<div class="title">背景と準備（ <code>text00</code> ）</div>
+<ul>
+<li>背景</li>
+<li>準備</li>
+</ul>
+</div>
+<div class="ulist">
+<div class="title">コードとモデル図を対応づけてみよう（ <code>text01</code> ）</div>
+<ul>
+<li><code>sample00</code> （ウォーカー）を動かしてみよう</li>
+<li><code>sample01</code> ：システムの処理を担当するクラスを追加する</li>
+<li><code>sample01</code> の構造をクラス図に表す</li>
+<li><code>sample01</code> のコードを作成する</li>
+<li>ここまでのまとめ</li>
+</ul>
+</div>
+<div style="page-break-after: always"></div>
+<div class="ulist">
+<div class="title">要素技術をシステムに組込もう（ <code>text02</code> ）</div>
+<ul>
+<li><code>sample03</code> （ライントレーサー）を動かしてみよう</li>
+<li><code>sample03</code> の振舞いの図を描いてみよう</li>
+<li><code>sample03</code> の課題を検討しよう</li>
+<li><code>sample04</code> ：比例制御の実験をやろう</li>
+<li><code>sample05</code> ：検討結果をモデル図に反映する</li>
+<li><code>sample05</code> の構造をクラス図に表す</li>
+<li><code>sample05</code> のコードを作成する</li>
+<li>ここまでのまとめ</li>
+</ul>
+</div>
+<div style="page-break-after: always"></div>
+<div class="ulist">
+<div class="title">倒立振子ライブラリをモデルに組込もう（ <code>text03</code> ）</div>
+<ul>
+<li><code>sample_c4</code> （倒立振子のサンプル）を試す</li>
+<li><code>sample_4c</code> の構造をクラス図に表す</li>
+<li><code>sample_cpp4</code> ：倒立振子ライブラリの呼び出し方を考える</li>
+<li><code>sample_cpp4</code> の構造をクラス図に表す</li>
+<li><code>sample_cpp4</code> のコードを作成する</li>
+<li>ここまでのまとめ</li>
+<li>トレーニングのまとめ</li>
+</ul>
+</div>
+</section>
+<section class="slide" id="_準備１演習で使う走行体のチェック">
+<h2>準備１：演習で使う走行体のチェック</h2>
+<div class="paragraph"><p>必ず、 <strong>参加年に指定された「EV3way-ET組み立て手順書」</strong> を確認しましょう。</p></div>
+<div class="paragraph"><p>最初は倒立振子を使わないで演習します。<br />
+そのため、このトレーニングで使う <strong>「トレーニング用補助脚」</strong> がないと困ります。</p></div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+ロボットの前部に「トレーニング用補助脚」をとりつけてありますか
+</li>
+</ol>
+</div>
+<div class="imageblock" style="text-align: center">
+<div class="content">
+<img alt="guard_leg_front_view" src="images/トレーニング用補助脚前.png" width="50%" />
+</div>
+<div class="title">図 1. トレーニング用補助脚（前部）</div>
+</div>
+<div style="page-break-after: always"></div>
+<div class="olist arabic">
+<ol class="arabic" start="2">
+<li>
+ロボットの後部にも「トレーニング用補助脚」をとりつけてありますか
+</li>
+</ol>
+</div>
+<div class="imageblock" style="text-align: center">
+<div class="content">
+<img alt="guard_leg_rear_view" src="images/トレーニング用補助脚後.png" width="50%" />
+</div>
+<div class="title">図 2. トレーニング用補助脚（後部）</div>
+</div>
+<div style="page-break-after: always"></div>
+<div class="olist arabic">
+<ol class="arabic" start="3">
+<li>
+リフトアームを取り付ける向き（脚にする側のポッチ数）に気をつけます
+</li>
+</ol>
+</div>
+<div class="imageblock" style="text-align: center">
+<div class="content">
+<img alt="gurard_leg_side_view" src="images/トレーニング用補助脚横.png" width="50%" />
+</div>
+<div class="title">図 3. 「トレーニング用補助脚」の装着状態を横からみた図</div>
+</div>
+</section>
+<section class="slide" id="_準備２ev3用の環境構築">
+<h2>準備２：EV3用の環境構築</h2>
+<div class="paragraph"><p>Mindstorms EV3を使う場合は次の構築手順に従います。</p></div>
+<div class="ulist">
+<ul>
+<li><p>
+ETロボコン EV3開発環境構築ガイド<div class="ulist">
+<ul>
+<li><a class="bare" href="https://github.com/ETrobocon/etroboEV3/wiki">https://github.com/ETrobocon/etroboEV3/wiki</a></li>
+</ul>
+</div></p></li>
+<li><p>
+TOPPERS/EV3RT とは？<div class="ulist">
+<ul>
+<li><a class="bare" href="http://dev.toppers.jp/trac_user/ev3pf/wiki/WhatsEV3RT">http://dev.toppers.jp/trac_user/ev3pf/wiki/WhatsEV3RT</a></li>
+</ul>
+</div></p></li>
+<li><p>
+開発環境構築のマニュアル<div class="ulist">
+<ul>
+<li><a class="bare" href="http://dev.toppers.jp/trac_user/ev3pf/wiki/DevEnv#開発環境構築のマニュアル">http://dev.toppers.jp/trac_user/ev3pf/wiki/DevEnv#開発環境構築のマニュアル</a></li>
+</ul>
+</div></p></li>
+</ul>
+</div>
+<div class="paragraph"><p>また、下記を参照しておくとよいでしょう。</p></div>
+<div class="ulist">
+<ul>
+<li><p>
+開発環境構築の課題と対処（特に EV3RT における C&#43;&#43; のデストラクタの問題の項）<div class="ulist">
+<ul>
+<li><a class="bare" href="https://github.com/ETrobocon/etroboEV3/wiki/problem_and_coping">https://github.com/ETrobocon/etroboEV3/wiki/problem_and_coping</a></li>
+</ul>
+</div></p></li>
+</ul>
+</div>
+</section>
+<section class="slide" id="_準備３ターミナルの使い方の確認">
+<h2>準備３：ターミナルの使い方の確認</h2>
+<div class="paragraph"><p>Cygwinやターミナルが動作することを確認します。</p></div>
+<table class="tableblock frame-all grid-all" style="width:100%">
+<colgroup>
+<col style="width:50%" />
+<col style="width:50%" />
+</colgroup>
+<tbody>
+<tr>
+  <td class="tableblock halign-left valign-top"><div><div class="ulist">
+  <div class="title">Windowsユーザー:</div>
+  <ul>
+  <li>Cygwinのシェルは起動しますか</li>
+  <li>Unixの基本コマンドが使えることを確認しておきましょう</li>
+  </ul>
+  </div>
+  <div class="ulist">
+  <div class="title">Macユーザー:</div>
+  <ul>
+  <li>ターミナル（Terminal.app）は使えますか</li>
+  <li>Unixの基本コマンドが使えることを確認しておきましょう</li>
+  </ul>
+  </div></div></td>
+  <td class="tableblock halign-left valign-top"><div><div class="imageblock" style="text-align: center; float: center">
+  <div class="content">
+  <img alt="cygwin_shell_window" src="images/cygwin_shell_window.png" width="75%" />
+  </div>
+  <div class="title">図 4. cygwinのシェル画面</div>
+  </div></div></td>
+</tr>
+</tbody>
+</table>
+<section class="slide" id="_unix_のコマンドに慣れておきましょう">
+<h2>Unix のコマンドに慣れておきましょう</h2>
+<div class="paragraph"><p>Unixの基本コマンド（ <code>cd</code>, <code>ls</code>, <code>cp</code>, <code>make</code> など）、ディレクトリやファイルの表記や操作方法を確認しておきましょう。</p></div>
+</section>
+</section>
+<section class="slide" id="_モデリングツールを用意する">
+<h2>モデリングツールを用意する</h2>
+<div class="paragraph"><p>モデリング演習には <strong>astah* Professional </strong> を使います。<br />
+参加者のみなさん向けに、期間限定の無償ライセンスが提供されています。</p></div>
+<div class="paragraph"><p>Windows PCだけでなく、MacやLinuxでも利用できます。</p></div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+参加者向けの入手方法に従ってツールをダウンロードします
+</li>
+<li>
+インストール手順に沿ってインストールします
+</li>
+</ol>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="icon-warning"></i>
+</td>
+<td class="content">
+<div class="title">提出するモデル図をどのツールで描くのかは参加チームの自由です</div>
+<div class="paragraph"><p>同じモデリングツールで演習するのは演習を円滑にするためです。<br />
+提出モデルの作成に使用するツールを強制しているわけではないことに注意しましょう。</p></div>
+</td>
+</tr>
+</table>
+</div>
+<div class="imageblock" style="text-align: center">
+<div class="content">
+<img alt="astah* Professionalの起動時の画面" src="images/astah_pro_start_splash_for_etrobo.png" width="50%" />
+</div>
+<div class="title">図 5. <strong>astah* Professional </strong> の起動時の画面（一部）</div>
+</div>
+</section>
+<section class="slide" id="_参加者向けライセンスを設定します">
+<h2>参加者向けライセンスを設定します</h2>
+<div class="paragraph"><p>評価用ライセンスではなく、<strong>astah* Professional</strong> の参加者向けライセンスを設定しましょう。<br />
+同じラインセンスで、 <strong>astah* SysML</strong> や、 <strong>astah* GSN</strong> も利用できます。</p></div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+参加者向けの入手方法に従ってライセンスを入手します
+</li>
+<li>
+<p>提供される手順に従って、<strong>astah* Professional</strong> を起動し、ライセンスを設定します</p>
+<div class="ulist">
+<ul>
+<li>Windows PCの場合、ライセンスの設定時だけは「管理者で実行」で起動する必要があります</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+</section>
+<section class="slide" id="_テキストエディターを用意する">
+<h2>テキストエディターを用意する</h2>
+<div class="paragraph"><p>「メモ帳で済ませよう」なんて、<strong>ダメ、ダメ、絶対！</strong></p></div>
+<div class="paragraph"><p>プログラミング用のテキストエディターや、Eclipseのような統合環境（IDE）を使いましょう。</p></div>
+<section class="slide" id="_テキストエディターの例">
+<h2>テキストエディターの例</h2>
+<div class="ulist">
+<div class="title">Windows用:</div>
+<ul>
+<li>Notepad++、TeraPad、サクラエディタ、Atom、Brackets、Emacs、Vim、Sublime Text、Visual Studio Codeなど</li>
+</ul>
+</div>
+<div class="ulist">
+<div class="title">Mac用:</div>
+<ul>
+<li>CotEditor、mi、TextMate、Atom、Brackets、Emacs、Vim、Sublime Text、Visual Studio Codeなど</li>
+</ul>
+</div>
+</section>
+</section>
+<section class="slide" id="_テキストエディターに慣れておく">
+<h2>テキストエディターに慣れておく</h2>
+<div class="paragraph"><p>このトレーニングは、テキストエディターとコマンドラインツールを使います。<br />
+トレーニング中は、みなさんで同じやり方で進めます。</p></div>
+<section class="slide" id="_基本操作を確認しましょう">
+<h2>基本操作を確認しましょう</h2>
+<div class="paragraph"><p>みなさんのテキストエディターの使い方を確認しておきましょう。</p></div>
+<div class="ulist">
+<ul>
+<li>ファイルの作成、削除、保存、別名での保存、扱えるファイル拡張子の確認</li>
+<li>文字単位、単語単位、行頭・行末、文頭・文末などへのカーソルの移動</li>
+<li>テキストの入力、削除、コピーやペースト、検索、置換</li>
+<li>その他提供されているコマンドの使い方</li>
+</ul>
+</div>
+</section>
+</section>
+<section class="slide" id="_ワークスペースを作成する">
+<h2>ワークスペースを作成する</h2>
+<div class="paragraph"><p>EV3RTの開発環境では、プログラムを作る場所をワークスペースと呼びます。<br />
+この演習で使うためのワークスペースを作成しましょう。</p></div>
+<div class="paragraph"><p>EV3RTをインストールしたディレクトリ中の <code>hrp2/sdk</code> ディレクトリに移動します。</p></div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint console language-console"><code>$ cd (ev3rtのインストールディレクトリ）/hrp2/sdk&#x000A;$ ls -1    <i class="conum" data-value="1"></i><b>(1)</b>&#x000A;common/&#x000A;LICENSE&#x000A;Makefile.sdk.conf&#x000A;workspace/</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>ls</code> はファイルリストの表示コマンド、 <code>-1</code> （ハイフン・イチ）は、縦1列に出力表示するオプション</td>
+</tr>
+</table>
+</div>
+<div style="page-break-after: always"></div>
+<div class="paragraph"><p>このディレクトリの中に <code>beginners</code> ディレクトリを作成します。</p></div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint console language-console"><code>$ mkdir beginners <i class="conum" data-value="1"></i><b>(1)</b>&#x000A;$ ls -1&#x000A;beginners/    <i class="conum" data-value="2"></i><b>(2)</b>&#x000A;common/&#x000A;LICENSE&#x000A;Makefile.sdk.conf&#x000A;workspace/</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>beginnersディレクトリを作成する</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>beginnersディレクトリが追加されている</td>
+</tr>
+</table>
+</div>
+</section>
+<section class="slide" id="_サンプルコードの準備">
+<h2>サンプルコードの準備</h2>
+<div class="paragraph"><p>サンプルコードは、 <code>beginners.zip</code> の中の <code>sample_cpp</code> ディレクトリに含まれています。</p></div>
+<div class="paragraph"><p>ワークスペースとして作成した <code>beginners</code> ディレクトリの中に、<code>sample_cpp</code> の中に含まれる <code>Makefile</code> と <code>sample00</code> ディレクトリとその中身すべてをコピーします（エクスプローラーやFinderで操作してもかまいません）</p></div>
+<div class="paragraph"><p>コピーしたら、コピー先のディレクトリの内容を確認しましょう。</p></div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint console language-console"><code>$ cd (ev3rtのインストールディレクトリ）/hrp2/sdk/beginners&#x000A;$ ls&#x000A;sample00/ Makefile&#x000A;&#x000A;$ ls sample00&#x000A;Makefile.inc  app.cfg  app.cpp  app.h  util.cpp  util.h</code></pre>
+</div>
+</div>
+</section>
+<section class="slide" id="_モデル図作成の準備">
+<h2>モデル図作成の準備</h2>
+<div class="paragraph"><p>モデル作成に使うクラスが定義されているテンプレートは、 <code>beginners.zip</code> の中の <code>asta-template</code> ディレクトリに含まれています。</p></div>
+<div class="paragraph"><p>内容を確認しておきましょう。</p></div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint console language-console"><code>$ cd (beginners.zip を展開した場所）&#x000A;$ ls asta-template/&#x000A;README.md&#x000A;ev3rt.asta  <i class="conum" data-value="1"></i><b>(1)</b>&#x000A;テンプレートの使い方について.md&#x000A;JudeP.properties <i class="conum" data-value="2"></i><b>(2)</b>&#x000A;JudeP.propertiesについて.md</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>EV3RT用 C&#43;&#43; ライブラリのテンプレートファイル</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td><strong>astah* </strong> を C&#43;&#43; 用に設定するためのプロパティファイル</td>
+</tr>
+</table>
+</div>
+<div style="page-break-after: always"></div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>演習で作成するモデルの保存用に、デスクトップに <code>beginners</code> ディレクトリを作成します</p>
+<div class="ulist">
+<ul>
+<li>エクスプローラーやFinderで作成してかまいません</li>
+<li>Windowsでは <code>c:￥Users￥ログオン名￥Desktop￥beginners</code> になります（円記号は半角です）</li>
+<li>Macでは <code>/Users/ログイン名/Desktop/beginners</code> になります</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+<div style="page-break-after: always"></div>
+<div class="olist arabic">
+<ol class="arabic" start="2">
+<li>
+テンプレートファイルをモデル保存用ディレクトリにコピーします
+</li>
+<li>
+<p>コピーできたかどうか確認します</p>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint console language-console"><code>$ cd (モデル保存用ディレクトリ）&#x000A;$ ls&#x000A;ev3rt.asta</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph"><p>モデル図を保存する場所が準備できました。</p></div>
+</section>
+<section class="slide" id="_環境の使い方に慣れておく">
+<h2>環境の使い方に慣れておく</h2>
+<div class="ulist">
+<div class="title">Cygwin環境（Macではターミナル）の操作方法:</div>
+<ul>
+<li>ファイルやディレクトリの配置の理解</li>
+<li>Unixのシェルとコマンドの使い方</li>
+</ul>
+</div>
+<div class="ulist">
+<div class="title">テキストエディターの操作方法:</div>
+<ul>
+<li>ファイルを作る、開く、保存する、閉じる</li>
+<li>文章やコードを入力する、削除する、コピー＆ペーストする</li>
+<li>文字列を検索、置換する</li>
+</ul>
+</div>
+<div class="ulist">
+<div class="title">モデリングツールの操作方法:</div>
+<ul>
+<li>プロジェクトファイルの作成、保存</li>
+<li>モデル図を追加、複製、削除する</li>
+<li>モデル図の要素の追加、移動、修正、削除</li>
+</ul>
+</div>
+<div class="ulist">
+<div class="title">モデリング言語の基本:</div>
+<ul>
+<li>UMLのよく使う図や構成要素の名前や役割</li>
+</ul>
+</div>
+</section>
+<section class="slide" id="_プログラムの実行形式について">
+<h2>プログラムの実行形式について</h2>
+<div class="paragraph"><p>EV3のプログラムをビルド・実行する方法は２つあります。</p></div>
+<div class="ulist">
+<ul>
+<li>動的ローディング形式（ローダを使って指定したプログラムを起動する方式）</li>
+<li>スタンドアローン形式（プログラム自身がブートイメージとなる方式）</li>
+</ul>
+</div>
+<div class="paragraph"><p>このトレーニングでは「動的ローディング形式」を使用します。</p></div>
+</section>
+<section class="slide" id="_動的ローディング形式の特徴">
+<h2>動的ローディング形式の特徴</h2>
+<div class="ulist">
+<ul>
+<li><p>
+EV3をリセットすることなく、アプリケーションプログラムを更新・追加できます<div class="ulist">
+<ul>
+<li>加えて、USBケーブルを使って転送すれば、Bluetoothの再接続やSDカードの抜き差しなしに転送できます</li>
+</ul>
+</div></p></li>
+<li><p>
+1枚のSDカードに複数のアプリケーションが登録できます<div class="ulist">
+<ul>
+<li>ファイル名を変えて転送しておけば、実行時に選択して実行できます</li>
+</ul>
+</div></p></li>
+<li><p>
+短時間でビルドできます<div class="ulist">
+<ul>
+<li>OSやライブラリを一緒にビルドしないので、その分ビルド時間が短くなります</li>
+</ul>
+</div></p></li>
+</ul>
+</div>
+</section>
+<section class="slide" id="_動的ローディング形式のビルド手順">
+<h2>動的ローディング形式のビルド手順</h2>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Cygwinやターミナルを起動して、アプリケーションのソースコードが含まれるワークスペース（下記の例では <code>beginners</code> ）へ移動します</p>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint console language-console"><code>$ cd （EV3RTのインストールディレクトリ）/hrp2/sdk/beginners</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>移動するのが、開発中のアプリケーションのディレクトリでは <strong>ない</strong> ことに注意しましょう</li>
+</ul>
+</div>
+</li>
+<li>
+<p>次のコマンドを実行します</p>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint console language-console"><code>$ make app=アプリケーションのディレクトリ名</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>ビルドに成功すると、 <code>beginners</code> ディレクトリ中に <code>app</code> というファイル名のロードモジュール（EV3本体に転送するファイル）ができます</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+</section>
+<section class="slide" id="_アプリケーションローダの準備">
+<h2>アプリケーションローダの準備</h2>
+<div class="paragraph"><p>動的ローディング形式のプログラムはアプリケーションローダを使って実行します。<br />
+みなさんの使っているEV3RTの開発環境が提供するアプリケーションローダでないとプログラムは起動しません。</p></div>
+<div class="paragraph"><p>micro SDカード（以降、短くSDカードと書きます）を使いまわすときなどは、SDカード上のアプリケーションローダを1度書き換えておいたほうがよいでしょう。</p></div>
+<div style="page-break-after: always"></div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>SDカードにアプリケーションローダを書き込みます</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+EV3RTインストールディレクトリの <code>sdcard</code> ディレクトリにある <code>uImage</code> を探します<br />
+これがアプリケーションローダのファイルです
+</li>
+<li>
+SDカードをPCに接続（挿入）します
+</li>
+<li>
+<code>uImage</code> を、SDカードのルートディレクトリにコピーします
+</li>
+<li>
+SDカードをPCと切断（抜出）します
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>EV3本体をEV3RTを使って起動します</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+SDカードをEV3本体に差し込んで、EV3本体の電源を入れます
+</li>
+<li>
+EV3RTのアプリケーションローダの画面が表示されたら起動は成功です
+</li>
+</ol>
+</div>
+</li>
+</ol>
+</div>
+</section>
+<section class="slide" id="_usbを使ったプログラムの転送実行手順">
+<h2>USBを使ったプログラムの転送・実行手順</h2>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+SDカードをEV3本体に差し込んで、EV3本体の電源を入れます
+</li>
+<li>
+<p>アプリケーションをSDカードに転送します</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+USBケーブルでPCとEV3本体を接続します
+</li>
+<li>
+PCがSDカードを認識するのを待ちます（USBメモリのような外部ドライブに見えるでしょう）
+</li>
+<li>
+ビルドしたアプリケーション（通常は <code>app</code> というファイル名です）を <code>/ev3rt/apps</code> ディレクトリにコピーします
+</li>
+<li>
+コピーが終わったら、SDカードとPCの接続を解除します
+</li>
+<li>
+解除を確認したら、EV3本体側のUSBケーブルを取り外します
+</li>
+</ol>
+</div>
+</li>
+</ol>
+</div>
+<div style="page-break-after: always"></div>
+<div class="olist arabic">
+<ol class="arabic" start="3">
+<li>
+<p>アプリケーションを動かします</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+アプリケーションローダの画面に「Load App」が表示されたら中央ボタンでローダのメニューに切替えます
+</li>
+<li>
+ロード元デバイスのリストが表示されたら、上下ボタンで「SD Card」に移動し、中央ボタンで選択します
+</li>
+<li>
+転送したファイルリストが表示されたら、 <code>app</code> （や自分が変えたファイル名）を中央ボタンで選択します
+</li>
+<li>
+アプリケーションが起動します
+</li>
+</ol>
+</div>
+</li>
+</ol>
+</div>
+</section>
+<section class="slide" id="end_of_chapter">
+<h2>本資料について</h2>
+<div class="paragraph"><p>資料名： 要素技術とモデルを開発に使おう: 背景と準備 （技術教育資料）<br />
+作成者： &#169; 2016,2017,2018,2019 by ETロボコン実行委員会<br />
+この文書は、技術教育「要素技術とモデルを開発に使おう」に使用するETロボコン公式トレーニングのテキストです。</p></div>
+<div class="paragraph"><p>2.3, 2019-04-12 16:46:59, 2019年用</p></div>
+</section>
+<div aria-role="navigation">
+<a class="deck-prev-link" href="#" title="Previous">&#8592;</a>
+<a class="deck-next-link" href="#" title="Next">&#8594;</a>
+</div>
+<p aria-role="status" class="deck-status">
+<span class="deck-status-current"></span>
+/
+<span class="deck-status-total"></span>
+</p>
+<form action="." class="goto-form" method="get">
+<label for="goto-slide">Go to Slide:</label>
+<input id="goto-slide" list="goto-datalist" name="slidenum" type="text" />
+<datalist id="goto-data-list"></datalist>
+<input type="submit" value="Go" />
+</form>
+</div>
+<script src="deck.js/jquery.min.js"></script>
+<script src="deck.js/core/deck.core.js"></script>
+<script src="deck.js/extensions/scale/deck.scale.js"></script>
+<script src="deck.js/extensions/goto/deck.goto.js"></script>
+<script src="deck.js/extensions/menu/deck.menu.js"></script>
+<script src="deck.js/extensions/navigation/deck.navigation.js"></script>
+<script src="deck.js/extensions/split/deck.split.js"></script>
+<script src="deck.js/extensions/status/deck.status.js"></script>
+<script type="text/javascript">
+  //<![CDATA[
+    (function($, deck, undefined) {
+      $.deck.defaults.keys['previous'] = [8, 33, 37, 39];
+      $.deck.defaults.keys['next'] = [13, 32, 34, 39];
+    
+      $.extend(true, $[deck].defaults, {
+          countNested: false
+      });
+    
+      $.deck('.slide');
+    })(jQuery, 'deck');
+  //]]>
+</script>
+<style type="text/css">
+  /*<![CDATA[*/
+    .slide.canvas-image {
+    -moz-background-size: cover;
+    -webkit-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    display: -moz-box;
+    display: -webkit-box;
+    display: -ms-box;
+    display: box;
+    -moz-box-orient: vertical;
+    -webkit-box-orient: vertical;
+    -ms-box-orient: vertical;
+    box-orient: vertical;
+    -moz-box-align: start;
+    -webkit-box-align: start;
+    -ms-box-align: start;
+    box-align: start;
+    -moz-box-pack: start;
+    -webkit-box-pack: start;
+    -ms-box-pack: start;
+    box-pack: start;}
+    
+    .bottom-left {
+      left: 1%;
+      bottom: 20%; }
+    
+    .top-left {
+      left: 1%;
+      top: 20%; }
+    
+    .bottom-right {
+      right: 1%;
+      bottom: 20%; }
+    
+    .top-right {
+      right: 1%;
+      top: 20%; }
+    
+    .center-up {
+      right: 50%;
+      top: 1%;
+    }
+    
+    .center-down {
+      right: 50%;
+      bottom: 1%;
+    }
+    .canvas-image .canvas-caption p {
+      text-align: center;
+      padding-top: 0;
+      padding: 0;
+      -moz-transform: none;
+      -webkit-transform: none;
+      -o-transform: none;
+      -ms-transform: none;
+      transform: none;
+      display: inline;
+      position: absolute;
+      background-color: rgba(0, 0, 0, 0.7);
+      font-weight: bold;
+      font-size: 58px;
+      -webkit-box-shadow: 2px 2px 2px #000;
+      -moz-box-shadow: 2px 2px 2px #000;
+      box-shadow: 2px 2px 2px #000;
+      padding: 1rem;
+      color: white; }
+    kbd.keyseq { color: #555555; }
+    kbd:not(.keyseq) {
+      display: inline-block;
+      color: #222222;
+      font-size: 0.7em;
+      line-height: 1.4;
+      background-color: #F7F7F7;
+      border: 1px solid #ccc;
+      -webkit-border-radius: 3px;
+      border-radius: 3px;
+      -webkit-box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2), 0 0 0 2px white inset;
+      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2), 0 0 0 2px white inset;
+      margin: -0.15em 0.15em 0 0.15em;
+      padding: 0.2em 0.6em;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    kbd kbd:first-child { margin-left: 0; }
+    kbd kbd:last-child { margin-right: 0; }
+  /*]]>*/
+</style>
+</body>
+</html>

@@ -1,0 +1,236 @@
+font:
+  catalog:
+    AozoraMincho:
+      normal: AozoraMinchoRegular.ttf
+      italic: AozoraMinchoRegular.ttf
+      bold: AozoraMinchoMedium.ttf
+      bold_italic: AozoraMinchoMedium.ttf
+    GenShinGothic-P:
+      normal: GenShinGothic-P-Normal.ttf
+      italic: GenShinGothic-P-Normal.ttf
+      bold: GenShinGothic-P-Medium.ttf
+      bold_italic: GenShinGothic-P-Medium.ttf
+    GenShinGothic-P-L:
+      normal: GenShinGothic-P-Light.ttf
+      italic: GenShinGothic-P-Light.ttf
+      bold: GenShinGothic-P-Normal.ttf
+      bold_italic: GenShinGothic-P-Normal.ttf
+    RictyDiminished:
+      normal: Migu-1M-Regular-circle-digit-reverse.ttf # 丸数字に色を付けたいから
+      bold: migu-1m-bold.ttf  # 上のフォントに合わせたいから
+      # normal: RictyDiminished-Regular.ttf
+      # bold: RictyDiminished-Bold.ttf
+      italic: RictyDiminished-Oblique.ttf  # ほんとは上のフォントのイタリックが欲しい
+      bold_italic: RictyDiminished-BoldOblique.ttf # ほんとは上のフォントのボールドイタリックが欲しい
+    M+ 1mn:
+      normal: mplus1mn-regular-ascii-conums.ttf
+      bold: mplus1mn-bold-ascii.ttf
+      italic: mplus1mn-italic-ascii.ttf
+      bold_italic: mplus1mn-bold_italic-ascii.ttf
+    M+ 1p Fallback:
+      normal: mplus1p-regular-fallback.ttf
+      bold: mplus1p-regular-fallback.ttf
+      italic: mplus1p-regular-fallback.ttf
+      bold_italic: mplus1p-regular-fallback.ttf
+  fallbacks:
+    - M+ 1p Fallback
+
+page:
+  background_color: ffffff
+  layout: portrait
+  # [top,right,bottom,left]
+  margin: [20mm, 20mm, 20mm, 20mm]
+  margin_inner: 0.75in
+  margin_outer: 0.59in
+
+base:
+  align: left
+  font_family: AozoraMincho
+  font_size: 10
+  font_size_small: 8
+  line_height: 1.5
+  border_color: 7F7F7F
+  border_width: 0.5
+
+vertical_rhythm: $base_line_height_length
+horizontal_rhythm: $base_line_height_length
+
+literal:
+  font_color: 253A59  # b12146
+  font_family: RictyDiminished  #M+ 1mn
+
+heading:
+  align: left
+  font_color: 2D466B
+  font_family: GenShinGothic-P
+  font_style: bold
+  # h1 is used for part titles (book doctype only)
+  h1_font_size: floor($base_font_size * 2.4)
+  h2_font_size: floor($base_font_size * 1.7)
+  h3_font_size: round($base_font_size * 1.4)
+  h4_font_size: round($base_font_size * 1.2)  # $base_font_size_large
+  h5_font_size: $base_font_size
+  h6_font_size: $base_font_size_small
+  # correct line height for Noto Serif metrics (comes with built-in line height)
+  line_height: 1.4
+  margin_top: $vertical_rhythm * 0.9
+  margin_bottom: $vertical_rhythm * 0.9
+
+title_page:
+  align: center
+  background_color: DAF0EA
+  title:
+    top: 18%
+    font_family: $heading_font_family
+    font_size: 20pt # $heading_h1_font_size
+    font_style: bold
+    line_height: 1.6  # 0.9
+  subtitle:
+    font_size: 28pt  # $heading_h3_font_size
+    font_color: 592C68  # 999999
+    font_family: $heading_font_family
+    font_style: bold
+    line_height: 1.2
+    margin-bottom: 12cm
+  authors:
+    font_size: 16pt  # $heading_h3_font_size
+    font_family: $heading_font_family
+    margin_top: $base_font_size * 1.25
+  revision:
+    margin_top: $base_font_size * 1.25
+
+caption:
+  align: left
+  font_size: $base_font_size * 0.8
+  font_family: GenShinGothic-P
+  font_color: $literal_font_color
+  # margin_inside: $vertical_rhythm / 3
+  margin_outside: 0
+
+admonition:
+  font_family: GenShinGothic-P-L
+  font_color: $literal_font_color
+  column_rule_color: $base_border_color
+  column_rule_width: $base_border_width
+  padding: [0, $horizontal_rhythm, 0, $horizontal_rhythm]
+  label:
+    font_style: $heading_font_style
+
+blockquote:
+  font_family: GenShinGothic-P-L
+  font_color: $literal_font_color
+  font_size: $base_font_size
+  border_color: B6E2D6 # $base_border_color
+  border_width: 5
+  # FIXME disable negative padding bottom once margin collapsing is implemented
+  padding: [0, $horizontal_rhythm, $block_margin_bottom * -0.75, $horizontal_rhythm + $blockquote_border_width / 2]
+  cite_font_size: $base_font_size_small
+  cite_font_color: 999999
+
+# code is used for source blocks (perhaps change to source or listing?)
+code:
+  font_color: $base_font_color
+  font_family: $literal_font_family
+  font_size: ceil($base_font_size)
+  padding: $code_font_size
+  line_height: 1.25
+  line_gap: 3.8
+  background_color: EAF5FA  # f5f5f5
+  border_color: ADD7EB # cccccc
+  border_radius: 8  # $base_border_radius
+  border_width: 0.75
+
+conum:
+  font_family: RictyDiminished  # M+ 1mn
+  font_color: $literal_font_color
+  font_size: $base_font_size * 1.2
+  line_height: 4 / 3
+
+sidebar:
+  font_family: GenShinGothic-P-L
+  font_color: $literal_font_color
+  background_color: F2F2F2 #  ECF8F5  # eeeeee
+  border_color: $base_border_color  # B6E2D6  # e1e1e1
+  border_radius: 8 # $base_border_radius
+  border_width: 0.75
+  # FIXME reenable padding bottom once margin collapsing is implemented
+  padding: [$vertical_rhythm, $vertical_rhythm * 1.2, 0, $vertical_rhythm * 1.2]
+  title:
+    align: left
+    font_color: $heading_font_color
+    font_family: $heading_font_family
+    font_size: $heading_h4_font_size
+    font_style: $heading_font_style
+toc:
+  indent: $horizontal_rhythm * 1.6
+  line_height: 1.7
+  margin_top: 10pt
+  # h1 is used for part titles (book doctype only)
+  h1_font_size: floor($base_font_size * 1.7)
+  h1_font_family: GenShinGothic-P
+  h1_font_style: bold
+  h2_font_size: floor($base_font_size * 1.4)
+  h2_font_family: GenShinGothic-P
+  h2_text_decoration: none
+  h3_font_size: round($base_font_size * 1.2)
+
+header:
+  font_size: $base_font_size_small
+  font_family: GenShinGothic-P-L
+  border_color: 7F7F7F  # dddddd
+  border_width: 0.75
+  height: $base_line_height_length * 3.5
+  padding: [$base_line_height_length / 2, 1, 0, 1]
+  vertical_align: bottom
+  recto:
+    right:
+      # content: '{section-or-chapter-title} | {page-number}'
+      # content: '{section-or-chapter-title}'
+      content: '{document-title} | {page-number}'
+    left:
+      content: image:ETrobocon_logo_2019.jpg[width="150"]
+  verso:
+    right:
+      content: $header_recto_right_content
+    left:
+      content: $header_recto_left_content
+
+footer:
+  font_size: $base_font_size_small
+  font_family: GenShinGothic-P-L
+  # NOTE if background_color is set, background and border will span width of page
+  border_color: 7F7F7F  # dddddd
+  border_width: 0.25
+  height: $base_line_height_length * 3.0
+  padding: [$base_line_height_length / 2, 1, 0, 1]
+  vertical_align: top
+  #image_vertical_align: <alignment> or <number>
+  # additional attributes for content:
+  # * {page-count}
+  # * {page-number}
+  # * {document-title}
+  # * {document-subtitle}
+  # * {chapter-title}
+  # * {section-title}
+  # * {section-or-chapter-title}
+  recto:
+    #columns: "<50% =0% >50%"
+    right:
+      #content: '{page-number}'
+      #content: '{section-or-chapter-title} | {page-number}'
+      #content: '{document-title} | {page-number}'
+    #center:
+    #  content: '{page-number}'
+      content: '{revdate}'
+    left:
+      content: 'v{revnumber}'
+  verso:
+    #columns: $footer_recto_columns
+    # left:
+    right:
+      content: $footer_recto_right_content
+      #content: '{page-number} | {chapter-title}'
+    #center:
+    #  content: '{page-number}'
+    left:
+      content: $footer_recto_left_content

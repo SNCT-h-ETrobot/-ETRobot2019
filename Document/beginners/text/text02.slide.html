@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible" />
+<meta content="Asciidoctor 1.5.8" name="generator" />
+<meta content="この文書は、技術教育「要素技術とモデルを開発に使おう」に使用するETロボコン公式トレーニングのテキストです。" name="description" />
+<meta content="ETロボコン実行委員会" name="author" />
+<title>要素技術とモデルを開発に使おう: 要素技術をシステムに組込もう</title>
+<link href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/3.2.1/css/font-awesome.min.css" rel="stylesheet" />
+<style>
+.conum { display: inline-block; color: white !important; background-color: #222222; -webkit-border-radius: 100px; border-radius: 100px; text-align: center; width: 1.2em; height: 1.2em; font-size: 0.9em; font-weight: bold; line-height: 1.2; font-family: Arial, sans-serif; font-style: normal; position: relative; top: -0.1em; }
+.conum * { color: white !important; }
+.conum + b { display: none; }
+.conum:after { content: attr(data-value); }
+.conum:not([data-value]):empty { display: none; }
+.colist table td:first-of-type { padding-right: 0.25em; }
+</style>
+<link href="http://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css" rel="stylesheet" />
+<script src="http://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
+<script>document.addEventListener('DOMContentLoaded', prettyPrint)</script>
+<link href="deck.js/core/deck.core.css" rel="stylesheet" />
+<link href="deck.js/extensions/scale/deck.scale.css" media="screen" rel="stylesheet" />
+<link href="deck.js/extensions/goto/deck.goto.css" media="screen" rel="stylesheet" />
+<link href="deck.js/extensions/menu/deck.menu.css" media="screen" rel="stylesheet" />
+<link href="deck.js/extensions/navigation/deck.navigation.css" media="screen" rel="stylesheet" />
+<link href="deck.js/extensions/status/deck.status.css" media="screen" rel="stylesheet" />
+<link href="deck.js/themes/style/mystyle.css" media="screen" rel="stylesheet" />
+<link href="deck.js/themes/transition/fade.css" media="screen" rel="stylesheet" />
+<link href="deck.js/core/print.css" media="print" rel="stylesheet" />
+<script src="deck.js/modernizr.custom.js"></script>
+</head>
+<body class="article">
+<div class="deck-container">
+<section class="slide" id="title-slide">
+<h1>要素技術とモデルを開発に使おう: 要素技術をシステムに組込もう</h1>
+<span id="author">ETロボコン実行委員会</span>
+<br />
+<span id="email"><a href="mailto:er-info@etrobo.jp">er-info@etrobo.jp</a></span>
+<br />
+<span id="revnumber"> 2.3,</span>
+<span id="revdate">2019-04-12 16:46:59</span>
+<br />
+<span id="revremark">2019年用</span>
+</section>
+<section class="slide" id="_sample03ライントレーサーを動かしてみよう">
+<h2>sample03（ライントレーサー）を動かしてみよう</h2>
+<div class="paragraph"><p>On/Off制御を使った簡単なライントレースのサンプルを動かしてみましょう。</p></div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<code>sample03</code> をビルドし、EV3本体に転送します
+</li>
+<li>
+黒い線の上から走行するよう置きます
+</li>
+<li>
+反時計回りにラインの外周に沿って走行します
+</li>
+<li>
+左ボタンを押すと停止します
+</li>
+<li>
+環境に合わせて、カラーセンサーのしきい値（ <code>mThreshold</code> ）を調整しましょう
+</li>
+</ol>
+</div>
+<div class="imageblock" style="text-align: center">
+<div class="content">
+<img alt="running_tracer" src="images/トレーサーの走行の様子.png" width="75%" />
+</div>
+<div class="title">図 1. トレーサーの走行の様子</div>
+</div>
+</section>
+<section class="slide" id="_sample03のコードを見てみよう">
+<h2>sample03のコードを見てみよう</h2>
+<div class="ulist">
+<ul>
+<li><code>main_task</code> とは別にトレース用のタスク（ <code>tracer_task</code> ）を使っています</li>
+<li>1回分のトレース動作をする <code>tracer_task</code> を繰り返し動作させるために、周期ハンドラを使っているのがわかります</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="title">リスト 1. <code>sample03/app.cfg</code> （タスク構成）</div>
+<div class="content">
+<pre class="prettyprint cpp language-cpp"><code>INCLUDE("app_common.cfg");&#x000A;&#x000A;#include "app.h"&#x000A;&#x000A;DOMAIN(TDOM_APP) {&#x000A;CRE_TSK( MAIN_TASK, { TA_ACT,  0, main_task,   MAIN_PRIORITY,   STACK_SIZE, NULL } );&#x000A;CRE_TSK( TRACER_TASK, { TA_NULL,  0, tracer_task, TRACER_PRIORITY, STACK_SIZE, NULL });&#x000A;&#x000A;EV3_CRE_CYC( TRACER_CYC, { TA_NULL, 0, tracer_cyc, 50, 1});&#x000A;}&#x000A;&#x000A;ATT_MOD("app.o");&#x000A;ATT_MOD("util.o");&#x000A;ATT_MOD("Tracer.o");</code></pre>
+</div>
+</div>
+<div style="page-break-after: always"></div>
+<div class="listingblock">
+<div class="title">リスト 2. <code>sample03/app/Tracer.h</code></div>
+<div class="content">
+<pre class="prettyprint linenums:1 cpp language-cpp"><code>#include "Motor.h"&#x000A;#include "ColorSensor.h"&#x000A;#include "util.h"&#x000A;&#x000A;using namespace ev3api;&#x000A;&#x000A;class Tracer {&#x000A;public:&#x000A;  Tracer();&#x000A;  void run();&#x000A;  void init();&#x000A;  void terminate();&#x000A;&#x000A;private:&#x000A;  Motor leftWheel;&#x000A;  Motor rightWheel;&#x000A;  ColorSensor colorSensor;&#x000A;  const int8_t mThreshold = 20;&#x000A;  const int8_t pwm = (Motor::PWM_MAX) / 6;&#x000A;};</code></pre>
+</div>
+</div>
+<div style="page-break-after: always"></div>
+<div class="listingblock">
+<div class="title">リスト 3. <code>sample03/app/Tracer.cpp</code> （抜粋）</div>
+<div class="content">
+<pre class="prettyprint linenums:13 cpp language-cpp"><code>void Tracer::terminate() {&#x000A;  msg_f("Stopped.", 1);&#x000A;  leftWheel.stop();&#x000A;  rightWheel.stop();&#x000A;}&#x000A;&#x000A;void Tracer::run() {&#x000A;  msg_f("running...", 1);&#x000A;  if(colorSensor.getBrightness() &gt;= mThreshold) { <i class="conum" data-value="1"></i><b>(1)</b>&#x000A;    leftWheel.setPWM(0);&#x000A;    rightWheel.setPWM(pwm);&#x000A;  } else {                      <i class="conum" data-value="2"></i><b>(2)</b>&#x000A;    leftWheel.setPWM(pwm);&#x000A;    rightWheel.setPWM(0);&#x000A;  }&#x000A;}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>明るい時（ライン外）の処理、左に曲がっています</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>暗い時（ライン上）の処理、右に曲がっています</td>
+</tr>
+</table>
+</div>
+<div style="page-break-after: always"></div>
+<div class="listingblock">
+<div class="title">リスト 4. <code>sample03/app.cpp</code> （その１）</div>
+<div class="content">
+<pre class="prettyprint linenums:1 cpp language-cpp"><code>#include "app.h"&#x000A;#include "Tracer.h"&#x000A;using namespace ev3api;&#x000A;&#x000A;Tracer tracer;                  // Tracerのインスタンスを作成&#x000A;&#x000A;void tracer_cyc(intptr_t exinf) {&#x000A;  act_tsk(TRACER_TASK);&#x000A;}&#x000A;&#x000A;void tracer_task(intptr_t exinf) {&#x000A;  if (ev3_button_is_pressed(LEFT_BUTTON)) {&#x000A;    wup_tsk(MAIN_TASK);         // 左ボタン押下でメインを起こす&#x000A;  } else {&#x000A;    tracer.run();               // 走行&#x000A;  }&#x000A;  ext_tsk();&#x000A;}</code></pre>
+</div>
+</div>
+<div style="page-break-after: always"></div>
+<div class="listingblock">
+<div class="title">リスト 5. <code>sample03/app.cpp</code> （その２）</div>
+<div class="content">
+<pre class="prettyprint linenums:22 cpp language-cpp"><code>void main_task(intptr_t unused) {&#x000A;  tracer.init();&#x000A;  ev3_sta_cyc(TRACER_CYC);&#x000A;  slp_tsk();                    // 起きたら、走行をやめる&#x000A;  ev3_stp_cyc(TRACER_CYC);&#x000A;  tracer.terminate();&#x000A;  ext_tsk();&#x000A;}</code></pre>
+</div>
+</div>
+</section>
+<section class="slide" id="_sample03のクラス図を描いてみよう">
+<h2>sample03のクラス図を描いてみよう</h2>
+<div class="paragraph"><p><code>sample03</code> の構造を表すクラス図を描いてみよう</p></div>
+<div class="ulist">
+<ul>
+<li><code>sample01</code> のクラス図を複製して修正するとよいでしょう</li>
+<li>タスク（ <code>main_task</code> 、<code>tracer_task</code> ）と周期ハンドラ（ <code>tracer_cyc</code> ）は C&#43;&#43; のクラスではありませんが、この演習の便宜上クラスを使って表しておきましょう</li>
+<li><p>
+<code>app</code> パッケージを追加して、そこに <code>Tracer</code> クラスを追加しましょう<div class="ulist">
+<ul>
+<li>名前空間で親を表示しておくとパッケージ名が可視化できます</li>
+</ul>
+</div></p></li>
+<li>ev3apiライブラリのクラスの詳細（属性やメソッド）は非表示にしておくとコンパクトになるでしょう</li>
+<li>属性の初期値をプロパティから入力して、表示するように設定するとよいでしょう</li>
+</ul>
+</div>
+</section>
+<section class="slide" id="_作成したsample03のクラス図">
+<h2>作成したsample03のクラス図</h2>
+<div class="imageblock" style="text-align: center">
+<div class="content">
+<img alt="sample03のクラス図" src="images/sample03のクラス図.png" width="75%" />
+</div>
+<div class="title">図 2. <code>sample03</code> のクラス図</div>
+</div>
+</section>
+<section class="slide" id="_sample03の振舞いの図を描いてみよう">
+<h2>sample03の振舞いの図を描いてみよう</h2>
+<div class="paragraph"><p>クラス図だけでは、どのように走行しているかわかりません。<br />
+あるメソッドがどのような振舞いをするかを図に描くには、アクティビティ図やステートマシン図を使います。</p></div>
+<div class="paragraph"><p>ここでは、 <code>Tracer</code> クラスの <code>run</code> メソッドの振舞いを表すのにアクティビティ図を使ってみましょう。</p></div>
+<div class="ulist">
+<div class="title"><code>Tracer</code> クラスの <code>run</code> メソッドのアクティビティ図の作成手順:</div>
+<ul>
+<li><code>run</code> メソッドの処理の流れがわかるよう、アクティビティ図を使ってみます</li>
+<li>メニューから「図」→「アクティビティ図」→「新規アクティビティ図」で作成します</li>
+<li>プロパティのベースタブで、図の名前を「 <code>Tracer</code> クラスの <code>run</code> メソッドのアクティビティ図」としましょう</li>
+<li><p>
+処理には「アクションノード」を、条件分岐には「ディシジョンノード」を使います<div class="ulist">
+<ul>
+<li>条件による分岐では、判断条件を「ガード条件」で表します</li>
+</ul>
+</div></p></li>
+<li>処理の開始場所がわかるよう「開始ノード」を使います</li>
+<li>処理の終了場所が判るよう「終了ノード」を使います</li>
+</ul>
+</div>
+</section>
+<section class="slide" id="_作成したrunメソッドのアクティビティ図">
+<h2>作成したrunメソッドのアクティビティ図</h2>
+<div class="imageblock" style="text-align: center">
+<div class="content">
+<img alt="sample03のTracerクラスのrunメソッドのアクティビティ図" src="images/sample03のTracerクラスのrunメソッドのアクティビティ図.png" width="75%" />
+</div>
+<div class="title">図 3. <code>Tracer</code> クラスの <code>run</code> メソッドのアクティビティ図</div>
+</div>
+</section>
+<section class="slide" id="_sample03の課題を検討しよう">
+<h2>sample03の課題を検討しよう</h2>
+<div class="ulist">
+<div class="title"><code>sample03</code> のライントレースは…</div>
+<ul>
+<li>ライン上かライン外かで左右のモーターをOn/Offする方法で左右に曲がりながら走行していました</li>
+<li>左右に揺れながら走行するので、姿勢が安定せず速度を上げると不安定になってしまうでしょう</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre><code>もう少し滑らかに走行するには、どんなことを調べたり、考えたりすればよいでしょうか。</code></pre>
+</div>
+</div>
+</section>
+<section class="slide" id="_カラーセンサーの値を詳しく調べてみよう">
+<h2>カラーセンサーの値を詳しく調べてみよう</h2>
+<div class="paragraph"><p>もう少し滑らかに走行する方法を考えるために、カラーセンサーの動作を少し調査してみましょう。</p></div>
+<div class="olist arabic">
+<div class="title">測り方1：組込みのPort Viewを使う</div>
+<ol class="arabic">
+<li>
+SDカードを挿入していない状態でEV3本体を起動します
+</li>
+<li>
+「Port View」を選択して、中央ボタンを押します
+</li>
+<li>
+左右ボタンを操作してカラーセンサーのポートを選択します
+</li>
+<li>
+カラーセンサーの取得値が表示されます
+</li>
+<li>
+ロボットを手でライン上からライン外へゆっくり移動させながら、カラーセンサーの取得値がどのように変化するか確認しましょう
+</li>
+<li>
+センサーとラインの位置と調べた値との関係をまとめて図にしておくとよいでしょう
+</li>
+</ol>
+</div>
+<div style="page-break-after: always"></div>
+<div class="olist arabic">
+<div class="title">測り方2：helloev3を使う</div>
+<ol class="arabic">
+<li>
+EV3RTの配布パッケージには、workspaceに「helloev3」というサンプルが含まれています
+</li>
+<li>
+「helloev3」をmakeしてEV3本体に転送し、メニューから選んで起動します
+</li>
+<li>
+「Connect Device」→「Connect Sensor」で「Sensor Port 3」を「Color Sensor」に設定します
+</li>
+<li>
+最初のメニューに戻って「Test sensor」→「Sensor port 3」を選択します
+</li>
+<li>
+「Reflect」を選択すると、赤外線ランプが点灯し、センサーが取得した明るさが表示されます
+</li>
+<li>
+ロボットを手でライン上からライン外へゆっくり移動させながら、カラーセンサーの取得値がどのように変化するか確認しましょう
+</li>
+<li>
+センサーとラインの位置と調べた値との関係をまとめて図にしておくとよいでしょう
+</li>
+</ol>
+</div>
+</section>
+<section class="slide" id="_滑らかに走る方法を考えてみよう">
+<h2>滑らかに走る方法を考えてみよう</h2>
+<div class="ulist">
+<div class="title">ラインの境界付近でのカラーセンサーの値:</div>
+<ul>
+<li>カラーセンサーの取得値は、白と黒の中間の値で徐々に変化しています</li>
+<li>中間の値の場合、まだラインの境界付近から大きくずれていないといえます</li>
+<li>大きくずれていないならば、旋回する度合いをその分小さくすると、ブレが減って滑らかになりそうです</li>
+</ul>
+</div>
+<div class="ulist">
+<div class="title">旋回する度合いを小さくするには:</div>
+<ul>
+<li>左右の旋回を切替えるとき、PWM値をいきなり「0」にして止めてしまわないで、中間値の大きさに応じて小さくしてみたらどうでしょうか</li>
+<li>カラーセンサーの目標値を白と黒の真ん中にしておき、実測値との差を求め、差の大小に応じて左右のモーターのPWM値を加減すれば、ズレに応じて旋回の度合いを調整できそうです</li>
+</ul>
+</div>
+</section>
+<section class="slide" id="_プログラムで使えるよう整理しよう">
+<h2>プログラムで使えるよう整理しよう</h2>
+<div class="paragraph"><p>いま考えているような制御の方法を「比例制御」といいます。<br />
+前のページで考えたことを、プログラムで計算できるよう整理しましょう。</p></div>
+<div class="ulist">
+<ul>
+<li>偏差 ＝ カラーセンサーの測定値 - カラーセンサーの目標値</li>
+<li>調整値 = 偏差に比例した値（偏差に係数をかけた値）</li>
+<li>調整後の左のモーターのPWM値 = 基準のPWM値 - 調整値</li>
+<li>調整後の右のモーターのPWM値 = 基準のPWM値 + 調整値</li>
+</ul>
+</div>
+<div class="paragraph"><p>調整値を求めるときに使う係数を「比例ゲイン（Kp）」、<br />
+調整後の左右のモーターのPWM値を「操作量」といいます。</p></div>
+</section>
+<section class="slide" id="_これでうまくいきそうでしょうか">
+<h2>これでうまくいきそうでしょうか</h2>
+<div class="paragraph"><p>アイディアは整理できましたが…</p></div>
+<div class="ulist">
+<ul>
+<li>まだ、効果的な方法かどうか確かめられていません</li>
+<li>どのようにプログラムを作れば実現できるかわかっていません</li>
+<li>どのくらいの値に調整すればよいかわかっていません</li>
+</ul>
+</div>
+<section class="slide" id="_アイディアの妥当性を確かめるには">
+<h2>アイディアの妥当性を確かめるには</h2>
+<div class="listingblock">
+<div class="content">
+<pre><code>実験しましょう！&#x000A;&#x000A;考えたことを実際に試してみて、効果や実現方法を決めましょう。</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section class="slide" id="_sample04を作成しよう比例制御の実験">
+<h2>sample04を作成しよう（比例制御の実験）</h2>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+サンプルコードの <code>sample03</code> ディレクトリをそっくりコピーして <code>sample04</code> ディレクトリを作ります
+</li>
+<li>
+考えた方法に合わせて <code>app/Tracer.cpp</code> の <code>run</code> メソッドを編集します
+</li>
+<li>
+編集が済んだら、期待したとおりに動くかどうか確認してみましょう
+</li>
+<li>
+うまくいかない時は、定数の値をいろいろ変更して実験してみるとよいでしょう
+</li>
+</ol>
+</div>
+<div class="paragraph"><p>作成したコードは次ページに掲載してあります。<br />
+定数は、みなさんで調整してみてください。</p></div>
+</section>
+<section class="slide" id="_実験用に作成したrunメソッドの例">
+<h2>実験用に作成したrunメソッドの例</h2>
+<div class="listingblock">
+<div class="title">リスト 6. <code>sample04/app/Tracer.cpp</code> （runメソッドの部分を抜粋）</div>
+<div class="content">
+<pre class="prettyprint linenums:18 cpp language-cpp"><code>void Tracer::run() {&#x000A;  const float Kp = 0.83;        <i class="conum" data-value="1"></i><b>(1)</b>&#x000A;  const int target = 10;        <i class="conum" data-value="2"></i><b>(2)</b>&#x000A;  const int bias = 0;           <i class="conum" data-value="3"></i><b>(3)</b>&#x000A;&#x000A;  msg_f("running...", 1);&#x000A;  int diff = colorSensor.getBrightness() - target;&#x000A;  float turn = Kp * diff + bias;&#x000A;  leftWheel.setPWM(pwm - turn);&#x000A;  rightWheel.setPWM(pwm + turn);&#x000A;}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>比例係数（1より小さい値で検討してみましょう）</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>白と黒の中間値を目標値として設定（実際に測った値を使ってみましょう）</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>調整値にいつも一定の値（バイアス）を追加しておきたい場合に設定します</td>
+</tr>
+</table>
+</div>
+</section>
+<section class="slide" id="_実験はうまくいきましたか">
+<h2>実験はうまくいきましたか？</h2>
+<div class="paragraph"><p>これでうまくいったので、オッケーでしょうか。</p></div>
+<div class="ulist">
+<ul>
+<li><code>sample04</code> で実験して実現したことは、モデル図のどこに反映されていますか</li>
+<li><code>sample03</code> のモデル図となにが変わったか考えてみましょう</li>
+</ul>
+</div>
+<section class="slide" id="_まだ実験しか終わっていなかった">
+<h2>まだ実験しか終わっていなかった！</h2>
+<div class="paragraph"><p>どうやら、実験は成功しましたが…、<br />
+その結果を、システムに組込んで使う仕事がまだだったようです。</p></div>
+</section>
+</section>
+<section class="slide" id="_実験の成果をモデル図に反映する">
+<h2>実験の成果をモデル図に反映する</h2>
+<div class="paragraph"><p>実験した結果を反映したモデル図を作成しましょう。</p></div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<strong>astah* </strong> で <code>sample03</code> のプロジェクトを「ファイル」→「プロジェクトの別名保存」で <code>sample05</code> として保存します
+</li>
+<li>
+クラス図の名前を <code>sample05のクラス図</code> に変更します
+</li>
+<li>
+<p>アクティビティ図を編集して、実験の時に確立した処理（次の2つを順に処理する）に合わせます</p>
+<div class="ulist">
+<ul>
+<li>比例制御の調整値の計算をしているところ</li>
+<li>実際に走行させるところ</li>
+</ul>
+</div>
+</li>
+<li>
+<p>調整値の計算は、走行そのものとは別の処理です名前をつけて分けたほうがよいでしょう</p>
+<div class="ulist">
+<ul>
+<li>処理を分けて <code>calc_prop_value</code> メソッドを作り、これを使うようにしましょう</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+</section>
+<section class="slide" id="_実験を反映したアクティビティ図">
+<h2>実験を反映したアクティビティ図</h2>
+<div class="imageblock" style="text-align: center">
+<div class="content">
+<img alt="sample05のTracerクラスのrunメソッドのアクティビティ図" src="images/sample05のTracerクラスのrunメソッドのアクティビティ図.png" width="75%" />
+</div>
+<div class="title">図 4. 実験を反映した <code>Tracer</code> クラスの <code>run</code> メソッドのアクティビティ図</div>
+</div>
+</section>
+<section class="slide" id="_実験を反映したクラス図">
+<h2>実験を反映したクラス図</h2>
+<div class="ulist">
+<ul>
+<li>クラス図を編集して <code>Tracer</code> クラスに <code>calc_prop_value</code> メソッドを追加しましょう。</li>
+<li>内部で使う操作なので private なメソッドにしてあることに注意しましょう。</li>
+</ul>
+</div>
+<div class="imageblock" style="text-align: center">
+<div class="content">
+<img alt="sample05のクラス図 marked" src="images/sample05のクラス図_marked.png" width="75%" />
+</div>
+<div class="title">図 5. <code>sample05</code> のクラス図</div>
+</div>
+</section>
+<section class="slide" id="_sample05のコードを作成する">
+<h2>sample05のコードを作成する</h2>
+<div class="paragraph"><p>モデル図に合わせて、コードを変更しましょう。</p></div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+サンプルコードの <code>sample04</code> ディレクトリをそっくりコピーして <code>sample05</code> ディレクトリを作りましょう
+</li>
+<li>
+クラス図に従って <code>Tracer.h</code> に <code>calc_prop_value</code> メソッドを追加します
+</li>
+<li>
+<code>Tracer.cpp</code> にも <code>calc_prop_value</code> メソッドを追加します
+</li>
+<li>
+<code>Tracer</code> クラスの <code>run</code> メソッドを <code>calc_prop_value</code> メソッドを使うように修正します
+</li>
+</ol>
+</div>
+<div class="paragraph"><p>作成したコードは次ページに掲載してあります。</p></div>
+<div class="paragraph"><p>コードが作成できたら、ビルドして、動作を確認しましょう。</p></div>
+<div style="page-break-after: always"></div>
+<div class="listingblock">
+<div class="title">リスト 7. <code>sample05/app/Tracer.h</code></div>
+<div class="content">
+<pre class="prettyprint linenums:15 cpp language-cpp"><code>private:&#x000A;  Motor leftWheel;&#x000A;  Motor rightWheel;&#x000A;  ColorSensor colorSensor;&#x000A;  const int8_t mThreshold = 20;&#x000A;  const int8_t pwm = (Motor::PWM_MAX) / 6;&#x000A;&#x000A;  float calc_prop_value();      <i class="conum" data-value="1"></i><b>(1)</b>&#x000A;};</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>calc_prop_value</code> メソッドを追加した</td>
+</tr>
+</table>
+</div>
+<div style="page-break-after: always"></div>
+<div class="listingblock">
+<div class="title">リスト 8. <code>sample05/app/Tracer.cpp</code> （ <code>calc_prop_value</code> メソッド）</div>
+<div class="content">
+<pre class="prettyprint linenums:19 cpp language-cpp"><code>float Tracer::calc_prop_value() {&#x000A;  const float Kp = 0.83;        <i class="conum" data-value="1"></i><b>(1)</b>&#x000A;  const int target = 10;        <i class="conum" data-value="2"></i><b>(2)</b>&#x000A;  const int bias = 0;&#x000A;&#x000A;  int diff = colorSensor.getBrightness() - target; <i class="conum" data-value="3"></i><b>(3)</b>&#x000A;  return (Kp * diff + bias);                       <i class="conum" data-value="4"></i><b>(4)</b>&#x000A;}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>比例係数</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>目標値とした白・黒の中間値</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>偏差を求める</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>調整値を求めて返す</td>
+</tr>
+</table>
+</div>
+<div style="page-break-after: always"></div>
+<div class="listingblock">
+<div class="title">リスト 9. <code>sample05/app/Tracer.cpp</code> （ <code>run</code> メソッド）</div>
+<div class="content">
+<pre class="prettyprint linenums:29 cpp language-cpp"><code>void Tracer::run() {&#x000A;  msg_f("running...", 1);&#x000A;  float turn = calc_prop_value(); <i class="conum" data-value="1"></i><b>(1)</b>&#x000A;  int pwm_l = pwm - turn;      <i class="conum" data-value="2"></i><b>(2)</b>&#x000A;  int pwm_r = pwm + turn;      <i class="conum" data-value="2"></i><b>(2)</b>&#x000A;  leftWheel.setPWM(pwm_l);&#x000A;  rightWheel.setPWM(pwm_r);&#x000A;}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>比例制御の調整値を求める</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>基準値と調整値を使って操作量を求める</td>
+</tr>
+</table>
+</div>
+</section>
+<section class="slide" id="_ここまでのまとめ">
+<h2>ここまでのまとめ</h2>
+<div class="paragraph"><p><code>sample05</code> のモデル図とコードを作成するまでにどんなことをやったでしょうか。</p></div>
+<div class="ulist">
+<ul>
+<li><p>
+元になる <code>sample03</code> を動かしてみました<div class="ulist">
+<ul>
+<li>周期ハンドラを使って周期的に処理しました</li>
+<li>ファイルをクラスごとに分け、パッケージにディレクトリを割当てました</li>
+</ul>
+</div></p></li>
+<li><p>
+滑らかに走行するためのアイディアを実験しました（ <code>sample04</code> ）<div class="ulist">
+<ul>
+<li>カラーセンサーの値の変化を調べました</li>
+<li>調べた結果を使って滑らかに走行できるか実験しました</li>
+</ul>
+</div></p></li>
+<li><p>
+実験した結果を使ってモデルを更新しました（ <code>sample05</code> ）<div class="ulist">
+<ul>
+<li>更新したモデル図に合わせてコードを作成し、動作を確認しました</li>
+</ul>
+</div></p></li>
+</ul>
+</div>
+</section>
+<section class="slide" id="_要素技術がモデルの要素になっていること">
+<h2>要素技術がモデルの要素になっていること</h2>
+<div class="paragraph"><p>モデル図に要素技術を活用している様子がわかるようにするには：</p></div>
+<div class="ulist">
+<ul>
+<li>モデル図上に要素技術を実現している構成要素として登場しているべきでしょう</li>
+<li>モデル図に登場するには、クラスやメソッドなど、モデル図の要素として表す必要があります</li>
+</ul>
+</div>
+<section class="slide" id="_要素技術をシステムに組込む手順">
+<h2>要素技術をシステムに組込む手順</h2>
+<div class="olist arabic">
+<div class="title">次のような検討手順で進めてみるとよいでしょう:</div>
+<ol class="arabic">
+<li>
+アイディアを出す、必要な情報を取得する・調査します
+</li>
+<li>
+実験してアイディアの効果を確かめます
+</li>
+<li>
+得られた結果を元のシステムのモデル図に「名前をつけて」組込みます
+</li>
+<li>
+更新したモデル図に合わせてコードを作成します
+</li>
+</ol>
+</div>
+</section>
+</section>
+<section class="slide" id="end_of_chapter">
+<h2>本資料について</h2>
+<div class="paragraph"><p>資料名： 要素技術とモデルを開発に使おう: 要素技術をシステムに組込もう （技術教育資料）<br />
+作成者： &#169; 2016,2017,2018,2019 by ETロボコン実行委員会<br />
+この文書は、技術教育「要素技術とモデルを開発に使おう」に使用するETロボコン公式トレーニングのテキストです。</p></div>
+<div class="paragraph"><p>2.3, 2019-04-12 16:46:59, 2019年用</p></div>
+</section>
+<div aria-role="navigation">
+<a class="deck-prev-link" href="#" title="Previous">&#8592;</a>
+<a class="deck-next-link" href="#" title="Next">&#8594;</a>
+</div>
+<p aria-role="status" class="deck-status">
+<span class="deck-status-current"></span>
+/
+<span class="deck-status-total"></span>
+</p>
+<form action="." class="goto-form" method="get">
+<label for="goto-slide">Go to Slide:</label>
+<input id="goto-slide" list="goto-datalist" name="slidenum" type="text" />
+<datalist id="goto-data-list"></datalist>
+<input type="submit" value="Go" />
+</form>
+</div>
+<script src="deck.js/jquery.min.js"></script>
+<script src="deck.js/core/deck.core.js"></script>
+<script src="deck.js/extensions/scale/deck.scale.js"></script>
+<script src="deck.js/extensions/goto/deck.goto.js"></script>
+<script src="deck.js/extensions/menu/deck.menu.js"></script>
+<script src="deck.js/extensions/navigation/deck.navigation.js"></script>
+<script src="deck.js/extensions/split/deck.split.js"></script>
+<script src="deck.js/extensions/status/deck.status.js"></script>
+<script type="text/javascript">
+  //<![CDATA[
+    (function($, deck, undefined) {
+      $.deck.defaults.keys['previous'] = [8, 33, 37, 39];
+      $.deck.defaults.keys['next'] = [13, 32, 34, 39];
+    
+      $.extend(true, $[deck].defaults, {
+          countNested: false
+      });
+    
+      $.deck('.slide');
+    })(jQuery, 'deck');
+  //]]>
+</script>
+<style type="text/css">
+  /*<![CDATA[*/
+    .slide.canvas-image {
+    -moz-background-size: cover;
+    -webkit-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    display: -moz-box;
+    display: -webkit-box;
+    display: -ms-box;
+    display: box;
+    -moz-box-orient: vertical;
+    -webkit-box-orient: vertical;
+    -ms-box-orient: vertical;
+    box-orient: vertical;
+    -moz-box-align: start;
+    -webkit-box-align: start;
+    -ms-box-align: start;
+    box-align: start;
+    -moz-box-pack: start;
+    -webkit-box-pack: start;
+    -ms-box-pack: start;
+    box-pack: start;}
+    
+    .bottom-left {
+      left: 1%;
+      bottom: 20%; }
+    
+    .top-left {
+      left: 1%;
+      top: 20%; }
+    
+    .bottom-right {
+      right: 1%;
+      bottom: 20%; }
+    
+    .top-right {
+      right: 1%;
+      top: 20%; }
+    
+    .center-up {
+      right: 50%;
+      top: 1%;
+    }
+    
+    .center-down {
+      right: 50%;
+      bottom: 1%;
+    }
+    .canvas-image .canvas-caption p {
+      text-align: center;
+      padding-top: 0;
+      padding: 0;
+      -moz-transform: none;
+      -webkit-transform: none;
+      -o-transform: none;
+      -ms-transform: none;
+      transform: none;
+      display: inline;
+      position: absolute;
+      background-color: rgba(0, 0, 0, 0.7);
+      font-weight: bold;
+      font-size: 58px;
+      -webkit-box-shadow: 2px 2px 2px #000;
+      -moz-box-shadow: 2px 2px 2px #000;
+      box-shadow: 2px 2px 2px #000;
+      padding: 1rem;
+      color: white; }
+    kbd.keyseq { color: #555555; }
+    kbd:not(.keyseq) {
+      display: inline-block;
+      color: #222222;
+      font-size: 0.7em;
+      line-height: 1.4;
+      background-color: #F7F7F7;
+      border: 1px solid #ccc;
+      -webkit-border-radius: 3px;
+      border-radius: 3px;
+      -webkit-box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2), 0 0 0 2px white inset;
+      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2), 0 0 0 2px white inset;
+      margin: -0.15em 0.15em 0 0.15em;
+      padding: 0.2em 0.6em;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    kbd kbd:first-child { margin-left: 0; }
+    kbd kbd:last-child { margin-right: 0; }
+  /*]]>*/
+</style>
+</body>
+</html>

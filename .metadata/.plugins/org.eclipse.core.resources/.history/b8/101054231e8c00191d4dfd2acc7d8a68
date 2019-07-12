@@ -1,0 +1,26 @@
+package RatSensors;
+
+import lejos.hardware.ev3.LocalEV3;
+import lejos.hardware.port.Port;
+import lejos.hardware.sensor.EV3ColorSensor;
+import lejos.hardware.sensor.SensorMode;
+
+public class myColorSensor{
+
+	private Port port;
+	private SensorMode color;
+	private EV3ColorSensor color_sensor;
+
+	public myColorSensor(String port_name){
+		this.port = LocalEV3.get().getPort(port_name);
+		this.color_sensor = new EV3ColorSensor(port);
+		this.color = color_sensor.getRedMode();
+	}
+
+	public float[] Redgetter() {
+		float[] Reddata = new float[color.sampleSize()];
+		color.fetchSample(Reddata,0);
+
+		return Reddata;
+	}
+}

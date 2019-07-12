@@ -1,0 +1,93 @@
+import( "TaskWakeupper.cdl" );
+import("EV3_common.cdl");
+
+/*
+ * MainTask:   主タスク        EV3 起動時から起動  優先度 EV3_MRUBY_VM_MAIN_PRIORITY    優先度が周期起床タスクより高いので、周期起床タスク起動後は休止させる
+ * WakeupTask: 周期起床タスク  EV3 起動時停止      優先度 EV3_MRUBY_VM_WAKEUP_PRIORITY  タスクが周期的に wakeup される
+ */
+
+//[domain(HRP2, "trusted")]
+//[domain(HRP2, "nontrusted")]
+region rDomainEV3 {
+  /*----------- Main VM  -----------*/
+	cell nMruby::tMruby MrubyMainVM {
+		mrubyFile="$(MRUBY_LIB_DIR)/EV3_common.rb "
+				"$(MRUBY_LIB_DIR)/RTOS.rb "
+       			"$(MRUBY_LIB_DIR)/Speaker.rb "
+				"$(MRUBY_LIB_DIR)/Button.rb "
+				"$(MRUBY_LIB_DIR)/Motor.rb "
+				"$(MRUBY_LIB_DIR)/UltrasonicSensor.rb "
+				"$(MRUBY_LIB_DIR)/GyroSensor.rb "
+				"$(MRUBY_LIB_DIR)/ColorSensor.rb "
+				"$(MRUBY_LIB_DIR)/TouchSensor.rb "
+				"$(MRUBY_LIB_DIR)/LED.rb "
+				"$(MRUBY_LIB_DIR)/LCD.rb "
+				"$(MRUBY_LIB_DIR)/Battery.rb "
+				"$(MRUBY_LIB_DIR)/Balancer.rb "
+        		"sharedmemory_def.rb "
+        		"$(MRUBY_LIB_DIR)/SharedMemory.rb "
+				"$(RUBY_MAIN_TASK_FILE) "
+				"$(APP_RB)";
+		cInit = VM_TECSInitializer.eInitialize;
+	};
+	cell tTask MrubyMainTask {
+	// 呼び口の結合 
+		cBody = MrubyMainVM.eMrubyBody;
+		//* 属性の設定
+		taskAttribute = C_EXP("TA_ACT");
+		priority = C_EXP("EV3_MRUBY_VM_MAIN_PRIORITY");
+		systemStackSize = C_EXP("MRUBY_VM_STACK_SIZE");
+	};
+
+  /*-------*/
+
+  /*----------- Wakeup VM -----------*/
+// /****
+  cell nMruby::tMruby MrubyWakeupVM {
+		mrubyFile="$(MRUBY_LIB_DIR)/EV3_common.rb "
+				"$(MRUBY_LIB_DIR)/RTOS.rb "
+        		"$(MRUBY_LIB_DIR)/Speaker.rb "
+				"$(MRUBY_LIB_DIR)/Button.rb "
+				"$(MRUBY_LIB_DIR)/Motor.rb "
+				"$(MRUBY_LIB_DIR)/UltrasonicSensor.rb "
+				"$(MRUBY_LIB_DIR)/GyroSensor.rb "
+				"$(MRUBY_LIB_DIR)/ColorSensor.rb "
+				"$(MRUBY_LIB_DIR)/TouchSensor.rb "
+				"$(MRUBY_LIB_DIR)/LED.rb "
+				"$(MRUBY_LIB_DIR)/LCD.rb "
+				"$(MRUBY_LIB_DIR)/Battery.rb "
+				"$(MRUBY_LIB_DIR)/Balancer.rb "
+        		"$(MRUBY_LIB_DIR)/SharedMemory.rb "
+        		"sharedmemory_def.rb "
+				"$(RUBY_FILE) "
+				"$(APP_RB_Wakeup)";
+		cInit = VM_TECSInitializer.eInitialize;
+	};
+
+	cell tTask MrubyWakeupTask {
+    // taskAttribute      = C_EXP("TA_ACT");
+    	taskAttribute      = C_EXP("TA_NULL");
+		priority = C_EXP("EV3_MRUBY_VM_WAKEUP_PRIORITY");
+		systemStackSize = C_EXP("MRUBY_VM_STACK_SIZE");
+
+		cBody = MrubyWakeupVM.eMrubyBody;
+	};
+
+  //--- WakeupTask を周期的に起床させる ----//
+  cell tTaskCyclicWakeupper TaskCyclicWakeupper {
+		ciTask = MrubyWakeupTask.eiTask;
+		// attribute = C_EXP( "TA_STA" );
+		attribute = C_EXP( "TA_NULL" );
+		cyclicTime   = 4;
+		cyclicPhase  = 0;
+  };
+// ****/
+
+};
+
+
+/*** Bridges ***/
+generate( MrubyBridgePlugin, rDomainEV3::TaskCyclicWakeupper, "" );
+generate( MrubyBridgePlugin, tTask, "" );
+generate( MrubyBridgePlugin, tSemaphore, "" );
+

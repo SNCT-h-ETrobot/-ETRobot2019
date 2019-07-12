@@ -1,0 +1,39 @@
+:encoding: utf-8
+:lang: ja
+:author: ETロボコン実行委員会
+:email: er-info@etrobo.jp
+:description: この文書は、技術教育「要素技術とモデルを開発に使おう」に使用するETロボコン公式トレーニングのテキストです。
+:revnumber: 2.4
+:revremark: 2019年用
+:version-label!:
+:linkcss:
+:stylesdir: css
+:imagesdir: images
+:sourcedir: ../sample_cpp
+:deckjs_theme: mystyle
+:icons: font
+ifdef::backend-html5,backend-deckjs[]
+:source-highlighter: prettify
+:image-align: align="center"
+endif::[]
+ifdef::backend-pdf[]
+:source-highlighter: rouge
+:title-logo-image: image:ill_4c.jpg[top=40%, align=center, pdfwidth=30%]
+:image-align: align="left"
+endif::[]
+:listing-caption: リスト
+:figure-caption: 図
+:example-caption: 例
+:table-caption: 表
+:appendix-caption: 付 録
+:toc-title: 目 次
+:sectanchors:
+:wolper-uri: http://www.etrobo.jp/
+ifdef::backend-deckjs[]
+:menu:
+:navigation:
+:status:
+:split:
+:goto:
+:pagenum:
+endif::[]
