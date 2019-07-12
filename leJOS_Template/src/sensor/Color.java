@@ -12,14 +12,14 @@ public class Color extends EV3ColorSensor {
 	}
 	
 	public void getRGB(float[] data) {
-		SensorMode color = super.getMode(super.COL_COLOR);
+		SensorMode color = super.getMode(COL_COLOR);
 		color.fetchSample(data, 0); //get data and store into data[0-2]
 	}
 	
-	public int getID() { //TODO: EV3ColorSensor::getColorID() returns Color ID?
+	public int getID() {
 		float[] value = new float[1];
 		
-		SensorMode  color = super.getMode(super.COL_REFLECT);
+		SensorMode  color = super.getMode(COL_REFLECT);
 		color.fetchSample(value, 0); //get data and store into value[0]
 		return (int)value[0];
 	}
