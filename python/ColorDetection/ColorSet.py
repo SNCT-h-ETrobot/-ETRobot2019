@@ -1,4 +1,4 @@
-color_dictionary = {
+color_range_set = {
  "red":{"min":0,"max":10},   
  "yellow":{"min":16,"max":26},   
  "green":{"min":71,"max":81}, 
