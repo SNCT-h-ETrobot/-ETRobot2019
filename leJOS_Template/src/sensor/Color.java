@@ -5,7 +5,6 @@ import lejos.hardware.sensor.SensorMode;
 import lejos.hardware.sensor.EV3ColorSensor;
 
 public class Color extends EV3ColorSensor {
-	protected SensorMode mode;
 	
 	public Color(Port port) {
 		super(port);
@@ -23,4 +22,9 @@ public class Color extends EV3ColorSensor {
 		color.fetchSample(value, 0); //get data and store into value[0]
 		return (int)value[0];
 	}
+	
+	public int getColorID() {
+		return super.getColorID();
+	}
+	
 }

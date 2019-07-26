@@ -44,15 +44,15 @@ public class DefCycle {
 				throw new IllegalArgumentException("Argument value is out of range.");
 			
 			if( l < 0 ) {
-				MotorL.controlMotor(-l, BasicMotorPort.FORWARD);
+				MotorL.controlMotor(l, BasicMotorPort.FORWARD);
 			} else {
-				MotorL.controlMotor(l, BasicMotorPort.BACKWARD);
+				MotorL.controlMotor(-l, BasicMotorPort.BACKWARD);
 			}
 
 			if( r < 0 ) {
-				MotorR.controlMotor(-r, BasicMotorPort.FORWARD);
+				MotorR.controlMotor(r, BasicMotorPort.FORWARD);
 			} else {
-				MotorR.controlMotor(r, BasicMotorPort.BACKWARD);
+				MotorR.controlMotor(-r, BasicMotorPort.BACKWARD);
 			}
 			
 		} catch(Exception e) {
