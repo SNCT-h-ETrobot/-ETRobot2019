@@ -8,7 +8,6 @@ src = np.array([[0.0,0.0],[0.0,1.0],[1.0,0.0]],np.float32)
 dst = src.copy
 
 coordinate_circle_layer = np.zeros((512,512,3),np.uint8)
-
 cv.namedWindow("circle")
 h,w = cv.getWindowImageRect('circle')[2:4]
 
@@ -31,7 +30,7 @@ def circle_callback(e,x,y,flags,param):
     elif e == cv.EVENT_RBUTTONUP:
         if moving == True:
             moving = False
-    
+
 cv.setMouseCallback('circle',circle_callback)
 
 while(1):
